@@ -179,7 +179,7 @@ export default function ChatPage() {
     setError('')
 
     try {
-      const res  = await fetch('/api/chat/message', {
+      const res  = await fetch('https://coding-learning-platform-4okh.onrender.com/api/chat/message', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ message: text, language }),
@@ -212,7 +212,7 @@ export default function ChatPage() {
   const clearHistory = async () => {
     if (!window.confirm('Clear all chat history for this language?')) return
     try {
-      await fetch(`/api/chat/history?language=${language}`, {
+      await fetch(`https://coding-learning-platform-4okh.onrender.com/api/chat/history?language=${language}`, {
         method:  'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

@@ -221,7 +221,7 @@ export default function CodeEditor({ language = 'python' }) {
     setExplanation('')
     setExplainError('')
     try {
-      const res = await fetch('/api/chat/explain', {
+      const res = await fetch('https://coding-learning-platform-4okh.onrender.com/api/chat/explain', {
         method:  'POST',
         headers: {
           'Content-Type': 'application/json',

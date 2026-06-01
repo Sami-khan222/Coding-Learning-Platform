@@ -201,7 +201,7 @@ export default function QuizPage() {
     setSubmitting(true)
     try {
       const questionIds = questions.map(q => q._id)
-      const res = await fetch('/api/quiz/submit', {
+      const res = await fetch('https://coding-learning-platform-4okh.onrender.com/api/quiz/submit', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ language: lang, questionIds, answers: finalAnswers }),

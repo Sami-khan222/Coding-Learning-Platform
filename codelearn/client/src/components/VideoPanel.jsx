@@ -84,7 +84,7 @@ export default function VideoPanel({ language = 'python' }) {
 
       try {
         const topicParam = selectedTopic !== 'all' ? `?topic=${selectedTopic}` : ''
-        const res  = await fetch(`/api/videos/${language}${topicParam}`)
+        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/videos/${language}${topicParam}`)
         const data = await res.json()
 
         if (!res.ok) throw new Error(data.message || 'Failed to load videos')

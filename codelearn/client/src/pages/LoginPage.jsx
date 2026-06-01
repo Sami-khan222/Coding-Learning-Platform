@@ -24,6 +24,9 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      if (!res.ok) {
+  throw new Error(`HTTP ${res.status}`);
+}
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Login failed')
       login(data.token, data.user)
