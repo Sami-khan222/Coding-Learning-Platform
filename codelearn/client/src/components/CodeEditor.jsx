@@ -185,7 +185,7 @@ export default function CodeEditor({ language = 'python' }) {
     setRunError('')
     setOutput(null)
     try {
-      const res = await fetch('/api/code/run', {
+      const res = await fetch('https://coding-learning-platform-4okh.onrender.com/api/code/run', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ language, code }),

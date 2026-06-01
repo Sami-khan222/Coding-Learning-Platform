@@ -25,7 +25,7 @@ export default function CertPage() {
   useEffect(() => {
     const fetchCert = async () => {
       try {
-        const res  = await fetch(`/api/certificate/${id}`)
+        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/certificate/${id}`)
         const data = await res.json()
         if (!res.ok) throw new Error(data.message || 'Certificate not found')
         setCert(data.certificate)

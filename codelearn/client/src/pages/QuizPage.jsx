@@ -181,7 +181,7 @@ export default function QuizPage() {
     setTimeLeft(SECONDS_PER_QUESTION)
 
     try {
-      const res = await fetch(`/api/quiz/${lang}`, {
+      const res = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/quiz/${lang}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()

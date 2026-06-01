@@ -20,7 +20,7 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('https://coding-learning-platform-4okh.onrender.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),

@@ -66,7 +66,7 @@ export default function VideoPanel({ language = 'python' }) {
 
     const fetchTopics = async () => {
       try {
-        const res  = await fetch(`/api/videos/${language}/topics`)
+        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/videos/${language}/topics`)
         const data = await res.json()
         if (res.ok) setTopics(data.topics || [])
       } catch {

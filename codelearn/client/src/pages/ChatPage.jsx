@@ -153,7 +153,7 @@ export default function ChatPage() {
       setMessages([])
       setError('')
       try {
-        const res  = await fetch(`/api/chat/history?language=${language}`, {
+        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/chat/history?language=${language}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()
