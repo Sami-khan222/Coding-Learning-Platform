@@ -27,13 +27,13 @@ const LANG_META = {
   cpp:        { label: 'C++',        emoji: '⚙️', gradient: 'from-blue-500 to-indigo-600', color: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/20' },
 }
 
-// ── Enhanced Icons ───────────────────────────────────────────────────
+// ── Icons ───────────────────────────────────────────────────
 const RunIcon  = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
 const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
 const ResetIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
 const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
 
-// ── Enhanced AI Explain Drawer ──
+// ── AI Explain Drawer ──
 function ExplainDrawer({ open, onClose, explanation, loading, error }) {
   // Render code blocks inside explanation
   const renderExplanation = (text) => {
@@ -75,11 +75,11 @@ function ExplainDrawer({ open, onClose, explanation, loading, error }) {
         />
       )}
 
-      {/* Enhanced Slide-in drawer */}
+      {/* Slide-in drawer */}
       <div className={`fixed top-0 right-0 h-full w-full sm:w-[500px] bg-gradient-to-br from-gray-900 to-gray-950 border-l border-gray-800 z-50 flex flex-col shadow-2xl transition-all duration-300 ease-out
         ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        {/* Enhanced Drawer header */}
+        {/* Drawer header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 shrink-0 bg-gradient-to-r from-gray-900 to-gray-800/50">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -101,7 +101,7 @@ function ExplainDrawer({ open, onClose, explanation, loading, error }) {
           </button>
         </div>
 
-        {/* Enhanced Drawer content */}
+        {/* Drawer content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 text-sm text-gray-300 leading-relaxed custom-scrollbar">
           {loading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 animate-fade-in">
@@ -143,7 +143,7 @@ function ExplainDrawer({ open, onClose, explanation, loading, error }) {
           )}
         </div>
 
-        {/* Enhanced Drawer footer */}
+        {/* Drawer footer */}
         {explanation && !loading && (
           <div className="px-6 py-4 border-t border-gray-800 shrink-0 bg-gray-900/50">
             <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-2">
@@ -160,7 +160,7 @@ function ExplainDrawer({ open, onClose, explanation, loading, error }) {
   )
 }
 
-// ── Enhanced Main CodeEditor ──
+// ── Main CodeEditor with Responsive Toolbar ONLY ──
 export default function CodeEditor({ language = 'python' }) {
   const { token } = useAuth()
   const meta = LANG_META[language] || LANG_META.python
@@ -243,72 +243,74 @@ export default function CodeEditor({ language = 'python' }) {
     <>
       <div className="flex flex-col gap-0 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl transition-all duration-300 hover:shadow-2xl">
 
-        {/* ── Enhanced Toolbar with glassmorphism ── */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            {/* Modern traffic lights */}
+        {/* ── RESPONSIVE TOOLBAR - Only this section changed ── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+          
+          {/* Left section - Traffic lights and language badge */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm hover:bg-red-600 transition-colors cursor-pointer" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm hover:bg-yellow-600 transition-colors cursor-pointer" />
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm hover:bg-green-600 transition-colors cursor-pointer" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 shadow-sm hover:bg-red-600 transition-colors cursor-pointer" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500 shadow-sm hover:bg-yellow-600 transition-colors cursor-pointer" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-sm hover:bg-green-600 transition-colors cursor-pointer" />
             </div>
             
-            {/* Enhanced language badge */}
-            <div className={`ml-2 px-3 py-1 rounded-lg text-xs font-bold ${meta.color} shadow-sm flex items-center gap-1.5`}>
-              <span className="text-base">{meta.emoji}</span>
-              <span>{meta.label}</span>
+            <div className={`ml-0 sm:ml-2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs font-bold ${meta.color} shadow-sm flex items-center gap-1 sm:gap-1.5`}>
+              <span className="text-sm sm:text-base">{meta.emoji}</span>
+              <span className="hidden xs:inline sm:inline">{meta.label}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Enhanced AI Explain button */}
+          {/* Right section - All buttons in responsive flex wrap */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+            
+            {/* AI Explain button */}
             <button
               onClick={explainCode}
-              className="group relative flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 transition-all duration-300 hover:scale-105"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 transition-all duration-300 hover:scale-105"
             >
-              <span className="text-base group-hover:scale-110 transition-transform">🤖</span>
-              <span>Explain with AI</span>
+              <span className="text-sm sm:text-base">🤖</span>
+              <span className="hidden xs:inline">Explain</span>
             </button>
 
-            {/* Enhanced Copy button */}
+            {/* Copy button */}
             <button 
               onClick={copyCode} 
-              className="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg btn-secondary transition-all duration-300 hover:scale-105"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium rounded-lg btn-secondary transition-all duration-300 hover:scale-105"
             >
               <CopyIcon />
               {copied ? (
-                <span className="text-green-500">Copied!</span>
+                <span className="text-green-500 text-[11px] sm:text-xs">Copied!</span>
               ) : (
-                <span>Copy</span>
+                <span className="hidden xs:inline">Copy</span>
               )}
             </button>
 
-            {/* Enhanced Reset button */}
+            {/* Reset button */}
             <button 
               onClick={resetCode} 
-              className="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg btn-secondary transition-all duration-300 hover:scale-105"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium rounded-lg btn-secondary transition-all duration-300 hover:scale-105"
             >
               <ResetIcon />
-              <span>Reset</span>
+              <span className="hidden xs:inline">Reset</span>
             </button>
 
-            {/* Enhanced Run button */}
+            {/* Run button */}
             <button
               onClick={runCode}
               disabled={running}
-              className="group relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
+              className="flex-1 sm:flex-none relative flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
-              <span className="relative z-10 flex items-center gap-1.5">
+              <span className="relative z-10 flex items-center gap-1 sm:gap-1.5">
                 {running ? (
                   <>
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Running...</span>
+                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[11px] sm:text-xs">Running...</span>
                   </>
                 ) : (
                   <>
                     <RunIcon />
-                    <span>Run Code</span>
+                    <span>Run</span>
                   </>
                 )}
               </span>
@@ -316,7 +318,7 @@ export default function CodeEditor({ language = 'python' }) {
           </div>
         </div>
 
-        {/* ── Monaco Editor with enhanced styling ── */}
+        {/* ── Monaco Editor (unchanged) ── */}
         <div className="relative">
           <Editor
             height="400px"
@@ -345,7 +347,7 @@ export default function CodeEditor({ language = 'python' }) {
           />
         </div>
 
-        {/* ── Enhanced Output Panel ── */}
+        {/* ── Output Panel (unchanged) ── */}
         <div className="bg-gradient-to-br from-gray-950 to-gray-900 border-t border-gray-800">
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-800 bg-gray-900/50">
             <div className="flex items-center gap-3">
@@ -502,4 +504,5 @@ export default function CodeEditor({ language = 'python' }) {
 .btn-secondary {
   @apply bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600;
 }
-*/
+
+/* Extra small breakpoint for responsive text */
