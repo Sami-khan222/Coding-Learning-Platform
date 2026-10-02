@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute'
 
 // Pages
+import VerifyPage from './pages/VerifyPage'
 import HomePage       from './pages/HomePage'
 import LearnPage      from './pages/LearnPage'
 import QuizPage       from './pages/QuizPage'
@@ -28,6 +29,8 @@ function AppRoutes() {
       <ScrollToTop />
       <Routes>
         {/* Public routes */}
+        <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/verify/:id" element={<VerifyPage />} />
         <Route path="/"               element={<HomePage />} />
         <Route path="/login"          element={<LoginPage />} />
         <Route path="/register"       element={<RegisterPage />} />
