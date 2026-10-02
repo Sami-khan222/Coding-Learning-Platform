@@ -28,10 +28,6 @@ const certificateSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-   revoked: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 export default mongoose.model('Certificate', certificateSchema)

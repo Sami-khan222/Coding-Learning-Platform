@@ -213,35 +213,14 @@ export default function HomePage() {
             <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-200 -z-10"></span>
           </Link>
         </div>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-  <Link
-    to="/register"
-    className="group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gray-900 px-8 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gray-900/20 dark:bg-white dark:text-gray-900 dark:shadow-white/10"
-  >
-    <span className="relative z-10">Create free account</span>
-    <span className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-    <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-  </Link>
-
-  <Link
-    to="/verify"
-    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/80 px-8 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:border-gray-700"
-  >
-    <span>📜</span>
-    <span>Verify a certificate</span>
-  </Link>
-</div>
       </section>
 
       {/* ── Footer ── */}
       <footer className="border-t border-gray-200 dark:border-gray-800 py-6 sm:py-8 text-center">
         <div className="max-w-7xl mx-auto px-4">
-          
-          <p className="text-xs text-gray-400 dark:text-gray-600">
-  <Link to="/verify" className="hover:underline">Verify certificate</Link>
-  {' · '}
-  Built with <span className="text-rose-500">♥</span> using React, Node.js, MongoDB & Gemini AI
-</p>
+          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600">
+            Built with <span className="text-red-500">❤️</span> using React, Node.js, MongoDB & Gemini AI
+          </p>
           <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 mt-1 sm:mt-2">
             © {new Date().getFullYear()} CodeLearn — Free forever. Empowering developers worldwide.
           </p>
