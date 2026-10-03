@@ -13,7 +13,7 @@ export default function VerifyPage() {
     setLoading(true)
     setResult(null)
     try {
-      const res = await fetch(`/api/certificate/verify/${encodeURIComponent(id.trim())}`)
+      const res = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/certificate/verify/${encodeURIComponent(id.trim())}`)
       setResult(await res.json())
     } catch {
       setResult({ valid: false, message: 'Something went wrong. Try again.' })
