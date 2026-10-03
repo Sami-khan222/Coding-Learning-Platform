@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 
 const LANG_META = {
   python:     { name: 'Python',     emoji: '🐍', color: '#10b981', gradient: 'from-emerald-500 to-teal-500' },
@@ -68,7 +69,7 @@ export default function CertPage() {
     alert('Certificate link copied to clipboard!')
   }
 
-  // ── Enhanced Loading ──
+  // ── Loading ──
   if (loading) return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
       <div className="text-center animate-fade-in-up">
@@ -82,7 +83,7 @@ export default function CertPage() {
     </div>
   )
 
-  // ── Enhanced Error ──
+  // ── Error ──
   if (error) return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center px-4">
       <div className="text-center max-w-md animate-fade-in-up">
@@ -105,12 +106,13 @@ export default function CertPage() {
   )
 
   const meta = LANG_META[cert.language] || { name: cert.language, emoji: '💻', color: '#6366f1', gradient: 'from-indigo-500 to-purple-500' }
+  const verifyUrl = `${window.location.origin}/verify/${cert.uniqueId}`
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 py-8 sm:py-12 px-4">
       <div className="max-w-4xl mx-auto">
 
-        {/* Enhanced Action buttons above cert */}
+        {/* Action buttons above cert */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 animate-fade-in-up">
           <Link to="/" className="group text-sm text-gray-500 hover:text-gray-300 transition-all duration-300 flex items-center gap-1 hover:gap-2">
             <span>←</span>
@@ -145,7 +147,7 @@ export default function CertPage() {
           </div>
         </div>
 
-        {/* ── Enhanced Certificate Card (this gets captured by html2canvas) ── */}
+        {/* ── Certificate Card (this gets captured by html2canvas) ── */}
         <div
           ref={certRef}
           className="relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-3xl"
@@ -155,7 +157,7 @@ export default function CertPage() {
             padding: '32px 40px',
           }}
         >
-          {/* Animated background particles */}
+          {/* Background glows */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-0 left-0 w-64 h-64 opacity-10 animate-pulse"
               style={{ background: `radial-gradient(circle at top left, ${meta.color}, transparent)` }} />
@@ -163,13 +165,13 @@ export default function CertPage() {
               style={{ background: `radial-gradient(circle at bottom right, ${meta.color}, transparent)` }} />
           </div>
 
-          {/* Top ribbon with gradient animation */}
+          {/* Top ribbon */}
           <div className="absolute top-0 left-0 right-0 h-1.5"
             style={{ background: `linear-gradient(90deg, transparent, ${meta.color}, ${meta.color}, transparent)` }} />
 
           <div className="relative z-10 text-center">
 
-            {/* Header with animated icon */}
+            {/* Header icon */}
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-indigo-500" />
               <div className="relative">
@@ -181,7 +183,7 @@ export default function CertPage() {
               <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-indigo-500" />
             </div>
 
-            {/* Title with gradient */}
+            {/* Title */}
             <h1 className="text-2xl sm:text-4xl font-black mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent tracking-tight">
               Certificate of Completion
             </h1>
@@ -189,7 +191,7 @@ export default function CertPage() {
               This certifies that
             </p>
 
-            {/* Name with calligraphy style */}
+            {/* Name */}
             <div className="mb-4">
               <p className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent" style={{ fontFamily: 'Georgia, serif' }}>
                 {cert.userName}
@@ -202,7 +204,7 @@ export default function CertPage() {
               has successfully completed the
             </p>
 
-            {/* Enhanced Language badge */}
+            {/* Language badge */}
             <div className="inline-flex items-center gap-4 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl mb-8 sm:mb-10 backdrop-blur-sm transform hover:scale-105 transition-transform duration-300"
               style={{
                 background: `linear-gradient(135deg, ${meta.color}22, ${meta.color}11)`,
@@ -218,7 +220,7 @@ export default function CertPage() {
               </div>
             </div>
 
-            {/* Score with progress ring effect */}
+            {/* Score */}
             <div className="flex items-center justify-center gap-3 mb-10 sm:mb-12">
               <span className="text-gray-500 text-sm">Final Score</span>
               <div className="relative">
@@ -238,8 +240,8 @@ export default function CertPage() {
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-700 to-transparent" />
             </div>
 
-            {/* Enhanced Footer info with icons */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
+            {/* Footer info */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 text-center">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3">
                 <div className="text-gray-600 text-xs uppercase tracking-wider mb-2">📅 Issued On</div>
                 <p className="text-gray-300 text-xs sm:text-sm font-semibold">{formatDate(cert.issuedAt)}</p>
@@ -248,28 +250,41 @@ export default function CertPage() {
                 <div className="text-gray-600 text-xs uppercase tracking-wider mb-2">🏆 Platform</div>
                 <p className="text-gray-300 text-xs sm:text-sm font-semibold">CodeLearn</p>
               </div>
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3">
-                <div className="text-gray-600 text-xs uppercase tracking-wider mb-2">🔑 Certificate ID</div>
-                <p className="text-gray-400 text-[10px] sm:text-xs font-mono">{id.slice(0, 13)}...</p>
+            </div>
+
+            {/* ID + QR row */}
+            <div className="mt-3 sm:mt-4 flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 text-left">
+              <div className="bg-white p-1.5 rounded-lg shrink-0">
+                <QRCodeSVG value={verifyUrl} size={72} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-gray-600 text-xs uppercase tracking-wider mb-1">🔑 Certificate ID</div>
+                <p className="text-gray-300 text-[11px] sm:text-xs font-mono break-all">{cert.uniqueId}</p>
+                <p className="text-gray-500 text-[10px] mt-1.5 break-all">Verify at: {verifyUrl}</p>
               </div>
             </div>
 
-          </div>
+          </div>{/* end relative z-10 text-center */}
 
           {/* Bottom ribbon */}
           <div className="absolute bottom-0 left-0 right-0 h-1.5"
             style={{ background: `linear-gradient(90deg, transparent, ${meta.color}, ${meta.color}, transparent)` }} />
-        </div>
+        </div>{/* end certificate card */}
 
-        {/* Enhanced Verification note */}
+        {/* Verification note */}
         <div className="mt-6 sm:mt-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-gray-800">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-800 max-w-full">
             <span className="text-xs text-gray-500">🔐 Verification ID:</span>
-            <span className="text-xs font-mono text-gray-400">{id}</span>
+            <span className="text-xs font-mono text-gray-400 break-all">{id}</span>
+          </div>
+          <div className="mt-3">
+            <Link to={`/verify/${id}`} className="text-xs text-indigo-400 hover:underline">
+              Verify this certificate →
+            </Link>
           </div>
         </div>
 
-        {/* Enhanced Next steps */}
+        {/* Next steps */}
         <div className="mt-8 sm:mt-12">
           <h3 className="text-center text-gray-400 text-sm font-semibold mb-4">Continue Your Journey</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -298,76 +313,3 @@ export default function CertPage() {
     </div>
   )
 }
-
-// Add these animations to your global CSS or Tailwind config:
-/*
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out forwards;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-bounce {
-  animation: bounce 1s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.delay-1000 {
-  animation-delay: 1s;
-}
-
-.delay-300 {
-  animation-delay: 0.3s;
-}
-
-.animation-delay-300 {
-  animation-delay: 0.3s;
-}
-
-.hover\:shadow-3xl:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-*/

@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute'
 
 // Pages
+import VerifyPage     from './pages/VerifyPage'
 import HomePage       from './pages/HomePage'
 import LearnPage      from './pages/LearnPage'
 import QuizPage       from './pages/QuizPage'
@@ -32,8 +33,10 @@ function AppRoutes() {
         <Route path="/login"          element={<LoginPage />} />
         <Route path="/register"       element={<RegisterPage />} />
         <Route path="/certificate/:id" element={<CertPage />} />
-
-        {/* Protected routes — require login */}
+        <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/verify/:id" element={<VerifyPage />} />
+        
+{/* Protected routes — require login */}
         <Route path="/learn/:lang"    element={
           <PrivateRoute><LearnPage /></PrivateRoute>
         } />
