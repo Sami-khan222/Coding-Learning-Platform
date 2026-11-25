@@ -1,302 +1,423 @@
 import { Link } from 'react-router-dom'
 
+// Page gutters: 24px on mobile, up to 80px on large screens
+const PAD = 'px-6 sm:px-10 lg:px-16 xl:px-20'
+
+/* ───────────────────────── Data ───────────────────────── */
+
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+
 const LANGUAGES = [
   {
     lang: 'python',
     name: 'Python',
-    emoji: '🐍',
-    desc: 'Beginner-friendly language perfect for data science, automation, and web apps.',
-    color: 'from-emerald-400 to-sky-500',
-    border: 'border-emerald-100 dark:border-emerald-500/20',
-    bg: 'hover:bg-gradient-to-br hover:from-emerald-50/50 hover:to-sky-50/50 dark:hover:from-emerald-500/5 dark:hover:to-sky-500/5',
-    badge: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20',
+    logo: `${DEVICON}/python/python-original.svg`,
+    desc: 'Beginner-friendly, and a strong fit for data science, automation and web apps.',
     topics: ['Variables', 'Functions', 'OOP', 'Libraries'],
   },
   {
     lang: 'javascript',
     name: 'JavaScript',
-    emoji: '⚡',
-    desc: 'The language of the web — build interactive UIs, servers, and full-stack apps.',
-    color: 'from-amber-400 to-orange-500',
-    border: 'border-amber-100 dark:border-amber-500/20',
-    bg: 'hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-orange-50/50 dark:hover:from-amber-500/5 dark:hover:to-orange-500/5',
-    badge: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20',
+    logo: `${DEVICON}/javascript/javascript-original.svg`,
+    desc: 'The language of the web. Build interactive UIs, servers and full-stack apps.',
     topics: ['DOM', 'Async/Await', 'ES6+', 'APIs'],
   },
   {
     lang: 'java',
     name: 'Java',
-    emoji: '☕',
-    desc: 'Robust, object-oriented language used in enterprise software and Android apps.',
-    color: 'from-orange-500 to-red-500',
-    border: 'border-orange-100 dark:border-orange-500/20',
-    bg: 'hover:bg-gradient-to-br hover:from-orange-50/50 hover:to-red-50/50 dark:hover:from-orange-500/5 dark:hover:to-red-500/5',
-    badge: 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20',
+    logo: `${DEVICON}/java/java-original.svg`,
+    desc: 'Robust and object-oriented, used across enterprise software and Android.',
     topics: ['OOP', 'Collections', 'Threads', 'Spring'],
   },
   {
     lang: 'cpp',
     name: 'C++',
-    emoji: '⚙️',
-    desc: 'High-performance language for systems programming, games, and competitive coding.',
-    color: 'from-blue-500 to-indigo-600',
-    border: 'border-blue-100 dark:border-blue-500/20',
-    bg: 'hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-indigo-50/50 dark:hover:from-blue-500/5 dark:hover:to-indigo-500/5',
-    badge: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20',
+    logo: `${DEVICON}/cplusplus/cplusplus-original.svg`,
+    desc: 'High-performance code for systems programming, games and competitive coding.',
     topics: ['Pointers', 'STL', 'Memory', 'OOP'],
   },
 ]
 
-const FEATURES = [
-  { icon: '🎨', title: 'Interactive Editor', desc: 'Write and run real code directly in your browser with Monaco Editor — the same editor that powers VS Code.' },
-  { icon: '🎥', title: 'Curated Videos', desc: 'Hand-picked YouTube tutorials organized by topic and difficulty. No searching — just learning.' },
-  { icon: '🤖', title: 'AI Tutor', desc: 'Ask questions and get your code explained instantly by Gemini AI — your personal coding assistant.' },
-  { icon: '📜', title: 'Earn Certificates', desc: 'Pass the quiz with 70%+ and download a shareable certificate to show off your new skills.' },
+const STATS = [
+  { value: '4', label: 'Languages' },
+  { value: '40+', label: 'Quiz questions' },
+  { value: '70%', label: 'Pass mark' },
+  { value: '$0', label: 'Cost' },
 ]
+
+/* ───────────────────────── Small pieces ───────────────────────── */
+
+function ArrowRight({ className = 'h-4 w-4' }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <path d="M4 10h12m0 0-5-5m5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function Check({ className = 'h-4 w-4' }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <path d="m4 10.5 4 4 8-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function Eyebrow({ children }) {
+  return (
+    <p className="text-xs font-medium uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+      {children}
+    </p>
+  )
+}
+
+function SectionHeading({ eyebrow, title, children, className = '' }) {
+  return (
+    <div className={className}>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-3 font-serif text-3xl tracking-tight text-stone-900 sm:text-4xl dark:text-stone-50">
+        {title}
+      </h2>
+      {children && (
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-stone-600 dark:text-stone-400">{children}</p>
+      )}
+    </div>
+  )
+}
+
+function WindowFrame({ title, children, className = '' }) {
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border border-stone-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.18)] dark:border-stone-800 dark:bg-stone-900 ${className}`}
+    >
+      <div className="flex items-center gap-2 border-b border-stone-200 bg-stone-50 px-4 py-2.5 dark:border-stone-800 dark:bg-stone-900">
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="ml-3 font-mono text-xs text-stone-500">{title}</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/* ───────────────────────── Product mockups ───────────────────────── */
+
+function EditorMock() {
+  return (
+    <WindowFrame title="main.py">
+      <div className="grid grid-cols-[2.5rem_1fr] font-mono text-[13px] leading-6">
+        <div className="select-none border-r border-stone-100 py-4 pr-3 text-right text-stone-400 dark:border-stone-800 dark:text-stone-600">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n}>{n}</div>
+          ))}
+        </div>
+        <pre className="overflow-x-auto py-4 pl-4 pr-4 text-stone-800 dark:text-stone-200">
+          <code>
+            <span className="text-indigo-600 dark:text-indigo-400">def</span>{' '}
+            <span className="text-amber-700 dark:text-amber-400">greet</span>(name):{'\n'}
+            {'    '}
+            <span className="text-indigo-600 dark:text-indigo-400">return</span>{' '}
+            <span className="text-emerald-700 dark:text-emerald-400">f"Hello, {'{name}'}!"</span>
+            {'\n\n'}
+            <span className="text-stone-400"># Try changing the name</span>
+            {'\n'}
+            <span className="text-sky-700 dark:text-sky-400">print</span>(greet(
+            <span className="text-emerald-700 dark:text-emerald-400">"world"</span>))
+          </code>
+        </pre>
+      </div>
+      <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 px-4 py-3 dark:border-stone-800 dark:bg-stone-950/50">
+        <div className="font-mono text-xs text-stone-600 dark:text-stone-400">
+          <span className="text-stone-400">$ </span>Hello, world!
+        </div>
+        <span className="rounded-md bg-stone-900 px-3 py-1 text-xs font-medium text-white dark:bg-stone-100 dark:text-stone-900">
+          Run
+        </span>
+      </div>
+    </WindowFrame>
+  )
+}
+
+function TutorMock() {
+  return (
+    <div className="space-y-3 rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
+      <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-stone-900 px-4 py-2.5 text-sm text-white dark:bg-stone-100 dark:text-stone-900">
+        Why does my loop never stop?
+      </div>
+      <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-stone-100 px-4 py-3 text-sm leading-relaxed text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+        Your condition <code className="rounded bg-white px-1 py-0.5 font-mono text-xs dark:bg-stone-900">i &lt; 10</code>{' '}
+        is always true because <code className="rounded bg-white px-1 py-0.5 font-mono text-xs dark:bg-stone-900">i</code>{' '}
+        is never incremented. Add <code className="rounded bg-white px-1 py-0.5 font-mono text-xs dark:bg-stone-900">i += 1</code>{' '}
+        inside the loop.
+      </div>
+      <div className="flex items-center justify-between rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-400 dark:border-stone-700">
+        Ask a follow-up…
+        <ArrowRight className="h-4 w-4" />
+      </div>
+    </div>
+  )
+}
+
+function VideoMock() {
+  const items = [
+    { t: 'Variables and data types', d: '12:40', active: true },
+    { t: 'Conditionals', d: '09:15' },
+    { t: 'Loops in practice', d: '14:02' },
+  ]
+  return (
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
+      <div className="relative aspect-video bg-stone-900">
+        <img
+          src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1000&q=70"
+          alt=""
+          className="h-full w-full object-cover opacity-70"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-stone-900">
+            <svg viewBox="0 0 20 20" className="ml-0.5 h-5 w-5" fill="currentColor" aria-hidden>
+              <path d="M6 4.5v11l9-5.5-9-5.5Z" />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+        {items.map((i) => (
+          <li key={i.t} className="flex items-center justify-between px-4 py-3 text-sm">
+            <span className={i.active ? 'font-medium text-stone-900 dark:text-white' : 'text-stone-500'}>{i.t}</span>
+            <span className="font-mono text-xs text-stone-400">{i.d}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function CertificateMock() {
+  return (
+    <div className="rounded-xl border border-stone-200 bg-[#fbf9f4] p-2 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.18)] dark:border-stone-700">
+      <div className="rounded-lg border border-stone-300 px-8 py-10 text-center">
+        <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-stone-500">CodeLearn</p>
+        <p className="mt-4 font-serif text-2xl text-stone-900">Certificate of Completion</p>
+        <p className="mt-5 text-xs text-stone-500">This certifies that</p>
+        <p className="mt-2 border-b border-stone-300 pb-2 font-serif text-xl italic text-stone-800">Your Name</p>
+        <p className="mt-4 text-xs leading-relaxed text-stone-500">
+          has passed the Python certification quiz with a score of <span className="font-semibold text-stone-800">86%</span>
+        </p>
+        <p className="mt-6 font-mono text-[10px] tracking-wider text-stone-400">ID · CL-8F3A-21C9</p>
+      </div>
+    </div>
+  )
+}
+
+/* ───────────────────────── Feature row ───────────────────────── */
+
+function FeatureRow({ eyebrow, title, body, points, visual, flip }) {
+  return (
+    <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+      <div className={flip ? 'lg:order-2' : ''}>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h3 className="mt-3 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl dark:text-stone-50">{title}</h3>
+        <p className="mt-4 max-w-md leading-relaxed text-stone-600 dark:text-stone-400">{body}</p>
+        <ul className="mt-6 space-y-2.5">
+          {points.map((p) => (
+            <li key={p} className="flex items-start gap-3 text-sm text-stone-700 dark:text-stone-300">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+              {p}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className={flip ? 'lg:order-1' : ''}>{visual}</div>
+    </div>
+  )
+}
+
+/* ───────────────────────── Page ───────────────────────── */
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-16 sm:pb-20 md:pb-24 px-4">
-        {/* Enhanced background gradient blobs with animation */}
-        <div className="absolute -top-24 -left-24 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-brand-400 via-purple-400 to-pink-400 opacity-20 dark:opacity-10 rounded-full blur-3xl animate-pulse pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tl from-blue-400 via-cyan-400 to-teal-400 opacity-20 dark:opacity-10 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-brand-300/10 to-purple-300/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative max-w-5xl mx-auto text-center">
-          {/* Animated badge */}
-          <div className="inline-block animate-fade-in-up">
-            <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 mb-6 sm:mb-8 text-xs sm:text-sm font-semibold bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm text-brand-600 dark:text-brand-400 rounded-full border border-brand-200 dark:border-brand-800 shadow-lg hover:shadow-xl transition-all duration-300">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              🚀 Free · No credit card · Open for everyone
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold leading-tight mb-4 sm:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white animate-fade-in-up animation-delay-200">
-            Learn to code{' '}
-            <span className="bg-gradient-to-r from-brand-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-              the smart way
-            </span>
+    <div className="min-h-screen bg-[#fcfbf8] text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+      {/* ─────────── HERO ─────────── */}
+      <section
+        className={`mx-auto grid max-w-7xl items-center gap-14 ${PAD} pb-24 pt-12 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:gap-20 lg:pb-36`}
+      >
+        <div>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            Free to use. No credit card required.
+          </p>
+          <h1 className="mt-5 font-serif text-5xl leading-[1.05] tracking-tight text-stone-900 sm:text-6xl dark:text-stone-50">
+            Learn to code by writing code.
           </h1>
-
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed animate-fade-in-up animation-delay-400 px-4">
-            Master Python, JavaScript, Java, and C++ with an interactive editor, curated videos,
-            an AI tutor, and certification quizzes — all in one place.
+          <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600 dark:text-stone-400">
+            Python, JavaScript, Java and C++ in one place: a browser editor, curated video lessons, an AI tutor for when
+            you're stuck, and a certificate when you're done.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fade-in-up animation-delay-600">
-            <Link to="/learn/python" className="group relative inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl hover:from-brand-700 hover:to-brand-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-              Start Learning Free →
-              <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-200 -z-10"></span>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/learn/python"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-stone-900 px-6 text-sm font-medium text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+            >
+              Start learning
+              <ArrowRight />
             </Link>
-            <Link to="/chat" className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
-              🤖 Try AI Tutor
+            <Link
+              to="/chat"
+              className="inline-flex h-12 items-center justify-center rounded-lg border border-stone-300 px-6 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-900"
+            >
+              Try the AI tutor
             </Link>
           </div>
 
-          {/* Enhanced Stats bar */}
-          <div className="mt-12 sm:mt-16 md:mt-20 flex flex-wrap justify-center gap-6 sm:gap-12 md:gap-16 text-center">
-            {[['4', 'Languages', '🌐'], ['40+', 'Quiz Questions', '📚'], ['100%', 'Free', '💝'], ['AI', 'Powered', '🧠']].map(([val, label, emoji]) => (
-              <div key={label} className="group hover:transform hover:-translate-y-1 transition-all duration-300">
-                <div className="flex items-center gap-2 text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-600 to-purple-600 bg-clip-text text-transparent">
-                  <span className="text-2xl sm:text-3xl">{emoji}</span>
-                  <span>{val}</span>
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">{label}</div>
+          <dl className="mt-14 grid max-w-md grid-cols-4 gap-4 border-t border-stone-200 pt-6 dark:border-stone-800">
+            {STATS.map(({ value, label }) => (
+              <div key={label}>
+                <dt className="font-serif text-2xl text-stone-900 dark:text-stone-50">{value}</dt>
+                <dd className="mt-1 text-xs text-stone-500">{label}</dd>
               </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="relative">
+          <EditorMock />
+          <div className="absolute -bottom-8 -left-4 hidden w-64 rounded-xl border border-stone-200 bg-white p-4 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] sm:block lg:-left-10 dark:border-stone-800 dark:bg-stone-900">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-stone-400">AI tutor</p>
+            <p className="mt-1.5 text-sm leading-snug text-stone-700 dark:text-stone-300">
+              The f before the quote lets you place variables inside the string.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────── LANGUAGES ─────────── */}
+      <section className="border-y border-stone-200 bg-white py-24 sm:py-32 dark:border-stone-800 dark:bg-stone-900/30">
+        <div className={`mx-auto max-w-7xl ${PAD}`}>
+          <SectionHeading eyebrow="Curriculum" title="Pick a language to start with">
+            You can switch whenever you like. Your progress in each one is saved separately.
+          </SectionHeading>
+
+          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-stone-200 bg-stone-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-stone-800 dark:bg-stone-800">
+            {LANGUAGES.map(({ lang, name, logo, desc, topics }) => (
+              <Link
+                key={lang}
+                to={`/learn/${lang}`}
+                className="group flex flex-col bg-white p-7 transition-colors hover:bg-stone-50 dark:bg-stone-950 dark:hover:bg-stone-900"
+              >
+                <img src={logo} alt={`${name} logo`} className="h-10 w-10" loading="lazy" />
+                <h3 className="mt-6 text-lg font-semibold text-stone-900 dark:text-white">{name}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">{desc}</p>
+                <p className="mt-5 text-xs text-stone-500">{topics.join(' · ')}</p>
+                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-stone-900 dark:text-stone-100">
+                  Start {name}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Language Cards ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3 sm:mb-4">
-            Choose your language
-          </h2>
-          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-            Start with any language — switch anytime, learn at your pace
-          </p>
-        </div>
+      {/* ─────────── FEATURES ─────────── */}
+      <section className={`mx-auto max-w-7xl space-y-28 ${PAD} py-24 sm:space-y-40 sm:py-32`}>
+        <FeatureRow
+          eyebrow="Video lessons"
+          title="Watch less, build more"
+          body="Every topic has a short, hand-picked tutorial. No hunting through search results for something at the right level."
+          points={['Organized by topic and difficulty', 'Watch next to the editor', 'Pick up where you left off']}
+          visual={<VideoMock />}
+        />
+        <FeatureRow
+          flip
+          eyebrow="AI tutor"
+          title="Stuck? Ask in plain English"
+          body="Paste your code and ask what's wrong. The tutor explains the problem and points to the fix instead of just handing over an answer."
+          points={['Explains errors and concepts', 'Understands the code you wrote', 'Powered by Gemini']}
+          visual={<TutorMock />}
+        />
+        <FeatureRow
+          eyebrow="Certificates"
+          title="Pass the quiz, get a certificate"
+          body="Score 70% or higher and download a certificate. Anyone can check that it's real using its ID."
+          points={['Downloadable and shareable', 'Public verification page', 'Retake the quiz any time']}
+          visual={<CertificateMock />}
+        />
+      </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-8">
-          {LANGUAGES.map(({ lang, name, emoji, desc, color, border, bg, badge, topics }) => (
-            <div
-              key={lang}
-              className={`group relative bg-white dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl ${border} p-5 sm:p-6 flex flex-col gap-4 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer border hover:border-brand-200 dark:hover:border-brand-800 ${bg}`}
-            >
-              {/* Animated gradient background on hover */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-500/0 to-purple-500/0 group-hover:from-brand-500/5 group-hover:to-purple-500/5 transition-all duration-500 pointer-events-none"></div>
-              
-              {/* Icon + gradient bar with animation */}
-              <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-2xl sm:text-3xl shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                {emoji}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br ${color} opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300 -z-10"></div>
-              </div>
-
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                  {name}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
-              </div>
-
-              {/* Topic chips */}
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {topics.map(t => (
-                  <span key={t} className={`text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full ${badge} transition-all hover:scale-105`}>
-                    {t}
-                  </span>
-                ))}
-              </div>
-
+      {/* ─────────── CTA ─────────── */}
+      <section className={`${PAD} pb-24 sm:pb-32`}>
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-2xl bg-stone-900">
+          <img
+            src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=70"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-25"
+            loading="lazy"
+          />
+          <div className="relative px-8 py-16 text-center sm:px-16 sm:py-24">
+            <h2 className="mx-auto max-w-2xl font-serif text-3xl tracking-tight text-white sm:text-5xl">
+              Write your first program today.
+            </h2>
+            <p className="mx-auto mt-5 max-w-md text-stone-300">
+              Create an account to save your progress and earn certificates. There's nothing to install.
+            </p>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                to={`/learn/${lang}`}
-                className="mt-auto relative overflow-hidden group/btn text-center text-sm font-semibold px-4 py-2.5 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-transparent transition-all duration-300"
+                to="/register"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-7 text-sm font-medium text-stone-900 transition-colors hover:bg-stone-200"
               >
-                <span className="relative z-10">Start Learning →</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-600 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                Create free account
+                <ArrowRight />
+              </Link>
+              <Link
+                to="/verify"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-white/25 px-7 text-sm font-medium text-white transition-colors hover:bg-white/10"
+              >
+                Verify a certificate
               </Link>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Features ── */}
-      <section className="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900/30 dark:via-gray-950 dark:to-gray-900/30 border-y border-gray-100 dark:border-gray-800 py-16 sm:py-20 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3 sm:mb-4">
-              Everything you need to learn
-            </h2>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">No extra tools, no subscriptions — just pure learning</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-8">
-            {FEATURES.map(({ icon, title, desc }, index) => (
-              <div key={title} className="group relative bg-white dark:bg-gray-900/40 rounded-2xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-800">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-brand-100 to-purple-100 dark:from-brand-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <div className="text-3xl sm:text-4xl transform group-hover:scale-110 transition-transform duration-300">{icon}</div>
-                </div>
-                <div className="mt-6 sm:mt-8">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                    {title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="relative py-16 sm:py-20 md:py-24 text-center px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-600/5 via-purple-600/5 to-pink-600/5 dark:from-brand-600/10 dark:via-purple-600/10 dark:to-pink-600/10"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-r from-brand-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-        
-        <div className="relative max-w-2xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3 sm:mb-4">
-            Ready to start coding?
-          </h2>
-          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
-            Join CodeLearn for free. No credit card, no setup — just open your browser and start your journey today.
-          </p>
-          <Link to="/register" className="group relative inline-flex items-center justify-center px-8 sm:px-10 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-brand-600 to-purple-600 rounded-xl hover:from-brand-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200">
-            Create Free Account →
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-200 -z-10"></span>
-          </Link>
-        </div>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-  <Link
-    to="/register"
-    className="group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gray-900 px-8 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gray-900/20 dark:bg-white dark:text-gray-900 dark:shadow-white/10"
-  >
-    <span className="relative z-10">Create free account</span>
-    <span className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-    <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-  </Link>
-
-  <Link
-    to="/verify"
-    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/80 px-8 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:border-gray-700"
-  >
-    <span>📜</span>
-    <span>Verify a certificate</span>
-  </Link>
-</div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-6 sm:py-8 text-center">
-        <div className="max-w-7xl mx-auto px-4">
-          <p className="text-xs text-gray-400 dark:text-gray-600">
-  <Link to="/verify" className="hover:underline">Verify certificate</Link>
-  {' · '}
-  Built with <span className="text-rose-500">♥</span> using React, Node.js, MongoDB & Gemini AI
-</p>
-          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 mt-1 sm:mt-2">
-            © {new Date().getFullYear()} CodeLearn — Free forever. Empowering developers worldwide.
+      {/* ─────────── FOOTER ─────────── */}
+      <footer className="border-t border-stone-200 py-12 dark:border-stone-800">
+        <div
+          className={`mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 ${PAD} text-xs text-stone-500 sm:flex-row`}
+        >
+          <p>© {new Date().getFullYear()} CodeLearn</p>
+          <nav className="flex items-center gap-5">
+            <Link to="/verify" className="hover:text-stone-900 dark:hover:text-stone-200">
+              Verify certificate
+            </Link>
+            <Link to="/chat" className="hover:text-stone-900 dark:hover:text-stone-200">
+              AI tutor
+            </Link>
+          </nav>
+          <p className="text-center sm:text-right">
+            Designed with{' '}
+            <a
+              href="https://claude.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-stone-700 underline-offset-4 hover:underline dark:text-stone-300"
+            >
+              Claude
+            </a>
+            {' · '}
+            Built by{' '}
+            <a
+              href="https://your-portfolio-url.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-stone-700 underline-offset-4 hover:underline dark:text-stone-300"
+            >
+              Sami Khan
+            </a>
           </p>
         </div>
       </footer>
     </div>
   )
 }
-
-// Add this to your global CSS file or Tailwind config for animations:
-/*
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
-}
-
-.animate-gradient {
-  background-size: 200% auto;
-  animation: gradient 3s linear infinite;
-}
-
-.animation-delay-200 {
-  animation-delay: 0.2s;
-}
-
-.animation-delay-400 {
-  animation-delay: 0.4s;
-}
-
-.animation-delay-600 {
-  animation-delay: 0.6s;
-}
-
-.delay-1000 {
-  animation-delay: 1s;
-}
-*/

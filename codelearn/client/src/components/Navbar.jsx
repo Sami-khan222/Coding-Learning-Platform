@@ -1,294 +1,356 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+
 const LANGUAGES = [
-  { label: 'Python',     lang: 'python',     color: 'text-emerald-500', icon: '🐍' },
-  { label: 'JavaScript', lang: 'javascript',  color: 'text-amber-500', icon: '⚡' },
-  { label: 'Java',       lang: 'java',        color: 'text-orange-500', icon: '☕' },
-  { label: 'C++',        lang: 'cpp',         color: 'text-blue-500', icon: '⚙️' },
+  { label: 'Python', lang: 'python', logo: `${DEVICON}/python/python-original.svg` },
+  { label: 'JavaScript', lang: 'javascript', logo: `${DEVICON}/javascript/javascript-original.svg` },
+  { label: 'Java', lang: 'java', logo: `${DEVICON}/java/java-original.svg` },
+  { label: 'C++', lang: 'cpp', logo: `${DEVICON}/cplusplus/cplusplus-original.svg` },
 ]
 
-function SunIcon() {
+/* ───────────── Icons ───────────── */
+
+const iconProps = {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.7,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+}
+
+const SunIcon = () => (
+  <svg {...iconProps} className="h-[18px] w-[18px]">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.06 1.06M17.34 17.34l1.06 1.06M5.6 18.4l1.06-1.06M17.34 6.66l1.06-1.06" />
+  </svg>
+)
+
+const MoonIcon = () => (
+  <svg {...iconProps} className="h-[18px] w-[18px]">
+    <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z" />
+  </svg>
+)
+
+const MenuIcon = () => (
+  <svg {...iconProps} className="h-5 w-5">
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg {...iconProps} className="h-5 w-5">
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+)
+
+const ChevronDown = ({ open }) => (
+  <svg {...iconProps} className={`h-4 w-4 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
+
+const SparkleIcon = ({ className = 'h-4 w-4' }) => (
+  <svg {...iconProps} className={className}>
+    <path d="M12 3.5 13.9 9l5.6 1.9-5.6 1.9L12 18.5l-1.9-5.7-5.6-1.9L10.1 9 12 3.5Z" />
+    <path d="M19 3v3M20.5 4.5h-3" />
+  </svg>
+)
+
+/* ───────────── Logo ───────────── */
+
+function LogoMark({ className = 'h-9 w-9' }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform group-hover:rotate-90 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+    <svg viewBox="0 0 36 36" className={className} aria-hidden>
+      <rect width="36" height="36" rx="9" className="fill-stone-900 dark:fill-stone-100" />
+      {/* prompt chevron */}
+      <path
+        d="m11 12.5 6.5 5.5-6.5 5.5"
+        fill="none"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="stroke-white dark:stroke-stone-900"
+      />
+      {/* cursor */}
+      <path d="M20.5 24h6" strokeWidth="2.8" strokeLinecap="round" className="stroke-indigo-400 dark:stroke-indigo-600" />
     </svg>
   )
 }
 
-function MoonIcon() {
+function Logo() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform group-hover:rotate-12 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-    </svg>
+    <Link to="/" className="flex items-center gap-2.5" aria-label="CodeLearn home">
+      <LogoMark />
+      <span className="font-serif text-xl tracking-tight text-stone-900 dark:text-stone-50">CodeLearn</span>
+    </Link>
   )
 }
 
-function MenuIcon() {
+function ThemeButton({ dark, onToggle }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
+    <button
+      onClick={onToggle}
+      aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="flex h-9 w-9 items-center justify-center rounded-md text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900 dark:hover:text-stone-100"
+    >
+      {dark ? <SunIcon /> : <MoonIcon />}
+    </button>
   )
 }
 
-function CloseIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  )
-}
+/* ───────────── Navbar ───────────── */
 
 export default function Navbar() {
   const { isAuth, user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
-  const [menuOpen, setMenuOpen] = useState(false)
 
-  // Sync dark class with state
+  const [dark, setDark] = useState(() => {
+  try {
+    return localStorage.getItem('cl_theme') !== 'light'
+  } catch {
+    return true
+  }
+})
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [userOpen, setUserOpen] = useState(false)
+  const userRef = useRef(null)
+
   useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('cl_theme', 'dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('cl_theme', 'light')
-    }
+    document.documentElement.classList.toggle('dark', dark)
+    try {
+      localStorage.setItem('cl_theme', dark ? 'dark' : 'light')
+    } catch {}
   }, [dark])
 
-  // Load saved theme on first render
   useEffect(() => {
-    const saved = localStorage.getItem('cl_theme')
-    if (saved === 'dark') {
-      setDark(true)
-      document.documentElement.classList.add('dark')
-    }
-  }, [])
+    setMenuOpen(false)
+    setUserOpen(false)
+  }, [location.pathname])
 
-  // Close mobile menu on route change
-  useEffect(() => { setMenuOpen(false) }, [location.pathname])
+  useEffect(() => {
+    if (!userOpen) return
+    const onClick = (e) => {
+      if (userRef.current && !userRef.current.contains(e.target)) setUserOpen(false)
+    }
+    const onKey = (e) => e.key === 'Escape' && setUserOpen(false)
+    document.addEventListener('mousedown', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [userOpen])
 
   const handleLogout = () => {
+    setUserOpen(false)
     logout()
     navigate('/')
   }
 
-  const isActiveLang = (lang) => location.pathname === `/learn/${lang}`
+  const toggleTheme = () => setDark((d) => !d)
+  const isActive = (path) => location.pathname === path
+  const initial = user?.name?.charAt(0).toUpperCase() || 'U'
+  const chatActive = isActive('/chat')
+
+  const linkBase = 'relative flex h-16 items-center gap-2 px-3 text-sm font-medium transition-colors'
+  const linkIdle = 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
+  const linkActive = 'text-stone-900 dark:text-stone-50'
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#fcfbf8]/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <Logo />
 
-          {/* Logo with animation */}
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 group relative">
-            <div className="relative">
-              <span className="text-2xl sm:text-3xl transition-transform group-hover:scale-110 duration-300 inline-block">
-                💻
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-500/20 to-purple-500/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300 -z-10"></div>
-            </div>
-            <div className="relative">
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-brand-600 via-brand-500 to-purple-600 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                CodeLearn
-              </span>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-600 to-purple-600 group-hover:w-full transition-all duration-300"></div>
-            </div>
+        {/* Desktop: language links only */}
+        <div className="hidden items-center md:flex">
+          {LANGUAGES.map(({ label, lang, logo }) => {
+            const path = `/learn/${lang}`
+            const active = isActive(path)
+            return (
+              <Link key={lang} to={path} className={`${linkBase} ${active ? linkActive : linkIdle}`}>
+                <img src={logo} alt="" className="h-4 w-4" loading="lazy" />
+                {label}
+                {active && (
+                  <span aria-hidden className="absolute inset-x-3 bottom-0 h-0.5 bg-stone-900 dark:bg-stone-100" />
+                )}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Desktop: right side */}
+        <div className="hidden items-center gap-2 md:flex">
+          {/* AI tutor: separate, button-style link */}
+          <Link
+            to="/chat"
+            aria-current={chatActive ? 'page' : undefined}
+            className={`inline-flex h-9 items-center gap-2 rounded-md border px-3.5 text-sm font-medium transition-colors ${
+              chatActive
+                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-300'
+                : 'border-stone-300 text-stone-800 hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-900'
+            }`}
+          >
+            <SparkleIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            AI tutor
           </Link>
 
-          {/* Desktop: Language links */}
-          <div className="hidden md:flex items-center gap-1 lg:gap-2">
-            {LANGUAGES.map(({ label, lang, color, icon }) => (
-              <Link
-                key={lang}
-                to={`/learn/${lang}`}
-                className={`relative group px-3 lg:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden
-                  ${isActiveLang(lang)
-                    ? 'text-brand-600 dark:text-brand-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+          <span aria-hidden className="mx-1 h-5 w-px bg-stone-200 dark:bg-stone-800" />
+
+          <ThemeButton dark={dark} onToggle={toggleTheme} />
+
+          {isAuth ? (
+            <div ref={userRef} className="relative">
+              <button
+                onClick={() => setUserOpen((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={userOpen}
+                className="flex items-center gap-2 rounded-md py-1.5 pl-1.5 pr-2 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
               >
-                {/* Active indicator background */}
-                {isActiveLang(lang) && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-brand-50 to-purple-50 dark:from-brand-500/10 dark:to-purple-500/10 rounded-xl"></div>
-                )}
-                
-                {/* Hover background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
-                {/* Content */}
-                <span className="relative z-10 flex items-center gap-2">
-                  <span className={`${color} text-base group-hover:scale-110 transition-transform duration-300 inline-block`}>
-                    {icon}
-                  </span>
-                  <span>{label}</span>
-                  {isActiveLang(lang) && (
-                    <span className="absolute -bottom-0 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-gradient-to-r from-brand-500 to-purple-500 rounded-full"></span>
-                  )}
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-900 text-xs font-semibold text-white dark:bg-stone-100 dark:text-stone-900">
+                  {initial}
                 </span>
-              </Link>
-            ))}
-          </div>
+                <span className="max-w-[100px] truncate text-sm font-medium text-stone-700 dark:text-stone-200">
+                  {user?.name?.split(' ')[0]}
+                </span>
+                <ChevronDown open={userOpen} />
+              </button>
 
-          {/* Desktop: Right side */}
-          <div className="hidden md:flex items-center gap-2 lg:gap-3">
-            {/* AI Chat link with glow effect */}
-            <Link
-              to="/chat"
-              className="group relative px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-300"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <span className="text-base group-hover:scale-110 transition-transform duration-300">🤖</span>
-                <span>AI Chat</span>
-              </span>
-              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-50 to-purple-50 dark:from-brand-500/5 dark:to-purple-500/5 rounded-xl"></div>
-              </div>
-            </Link>
-
-            {/* Dark mode toggle with enhanced animation */}
-            <button
-              onClick={() => setDark(d => !d)}
-              className="group relative p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-800/50 transition-all duration-300"
-              aria-label="Toggle dark mode"
-            >
-              <div className="relative z-10">
-                {dark ? <SunIcon /> : <MoonIcon />}
-              </div>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-
-            {/* Auth buttons with modern design */}
-            {isAuth ? (
-              <div className="flex items-center gap-3 ml-2">
-                <div className="relative group/avatar">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50">
-                    <div className="relative">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-r from-brand-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                      <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                      {user?.name?.split(' ')[0]}
-                    </span>
+              {userOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-60 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] dark:border-stone-800 dark:bg-stone-900"
+                >
+                  <div className="border-b border-stone-100 px-4 py-3 dark:border-stone-800">
+                    <p className="truncate text-sm font-medium text-stone-900 dark:text-stone-50">{user?.name}</p>
+                    <p className="mt-0.5 truncate text-xs text-stone-500">{user?.email}</p>
                   </div>
-                  
-                  {/* Hover card */}
-                  <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover/avatar:opacity-100 group-hover/avatar:visible transition-all duration-300 transform translate-y-2 group-hover/avatar:translate-y-0 z-50">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2">
-                      <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
-                        Signed in as
-                        <div className="font-medium text-gray-900 dark:text-white mt-1">{user?.email}</div>
-                      </div>
-                      <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors mt-1">
-                        Sign out
-                      </button>
-                    </div>
+                  <div className="p-1">
+                    <button
+                      role="menuitem"
+                      onClick={handleLogout}
+                      className="w-full rounded-md px-3 py-2 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                    >
+                      Sign out
+                    </button>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 ml-2">
-                <Link to="/login" className="relative px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-300">
-                  Login
-                </Link>
-                <Link to="/register" className="group relative px-5 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                  <span className="relative z-10">Sign up</span>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10"></div>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile: right side buttons */}
-          <div className="flex md:hidden items-center gap-1 sm:gap-2">
-            <button
-              onClick={() => setDark(d => !d)}
-              className="group p-2 sm:p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
-              aria-label="Toggle dark mode"
-            >
-              {dark ? <SunIcon /> : <MoonIcon />}
-            </button>
-            <button
-              onClick={() => setMenuOpen(o => !o)}
-              className="p-2 sm:p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
-            >
-              {menuOpen ? <CloseIcon /> : <MenuIcon />}
-            </button>
-          </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="rounded-md px-3 py-2 text-sm font-medium text-stone-600 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex h-9 items-center rounded-md bg-stone-900 px-4 text-sm font-medium text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
-      </div>
 
-      {/* Enhanced Mobile menu with animations */}
+        {/* Mobile controls */}
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeButton dark={dark} onToggle={toggleTheme} />
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-stone-600 transition-colors hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-900"
+          >
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur-lg animate-slide-down">
-          <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-2">
-            {/* Language links with icons */}
-            <div className="space-y-1">
-              <div className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3 pb-2">
-                Programming Languages
+        <div className="border-t border-stone-200 bg-[#fcfbf8] md:hidden dark:border-stone-800 dark:bg-stone-950">
+          <div className="space-y-6 px-4 py-5 sm:px-6">
+            {/* Languages */}
+            <div>
+              <p className="px-3 pb-2 text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Learn</p>
+              <div className="space-y-0.5">
+                {LANGUAGES.map(({ label, lang, logo }) => {
+                  const active = isActive(`/learn/${lang}`)
+                  return (
+                    <Link
+                      key={lang}
+                      to={`/learn/${lang}`}
+                      className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-stone-100 text-stone-900 dark:bg-stone-900 dark:text-stone-50'
+                          : 'text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-900'
+                      }`}
+                    >
+                      <img src={logo} alt="" className="h-5 w-5" loading="lazy" />
+                      {label}
+                    </Link>
+                  )
+                })}
               </div>
-              {LANGUAGES.map(({ label, lang, color, icon }) => (
-                <Link
-                  key={lang}
-                  to={`/learn/${lang}`}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group
-                    ${isActiveLang(lang)
-                      ? 'bg-gradient-to-r from-brand-50 to-purple-50 dark:from-brand-500/10 dark:to-purple-500/10 text-brand-600 dark:text-brand-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                    }`}
-                >
-                  <span className={`${color} text-lg group-hover:scale-110 transition-transform duration-300`}>
-                    {icon}
-                  </span>
-                  <span className="flex-1">{label}</span>
-                  {isActiveLang(lang) && (
-                    <div className="w-1.5 h-1.5 bg-gradient-to-r from-brand-500 to-purple-500 rounded-full"></div>
-                  )}
-                </Link>
-              ))}
             </div>
 
-            {/* AI Chat link */}
-            <Link to="/chat" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 group">
-              <span className="text-lg group-hover:scale-110 transition-transform duration-300">🤖</span>
-              <span>AI Chat</span>
-            </Link>
+            {/* AI tutor: its own section */}
+            <div className="border-t border-stone-200 pt-5 dark:border-stone-800">
+              <p className="px-3 pb-2 text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Help</p>
+              <Link
+                to="/chat"
+                className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                  chatActive
+                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+                    : 'text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-900'
+                }`}
+              >
+                <SparkleIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                AI tutor
+              </Link>
+            </div>
 
-            {/* Auth section */}
-            <div className="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800">
+            {/* Auth */}
+            <div className="border-t border-stone-200 pt-5 dark:border-stone-800">
               {isAuth ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 rounded-xl">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-brand-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg">
-                      {user?.name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {user?.name}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {user?.email}
-                      </div>
+                  <div className="flex items-center gap-3 px-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-900 text-sm font-semibold text-white dark:bg-stone-100 dark:text-stone-900">
+                      {initial}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-stone-900 dark:text-stone-50">{user?.name}</p>
+                      <p className="truncate text-xs text-stone-500">{user?.email}</p>
                     </div>
                   </div>
-                  <button onClick={handleLogout} className="w-full btn-secondary text-sm py-3 rounded-xl">
-                    Logout
+                  <button
+                    onClick={handleLogout}
+                    className="h-11 w-full rounded-md border border-stone-300 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-900"
+                  >
+                    Sign out
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  <Link to="/login" className="w-full btn-secondary text-sm py-3 rounded-xl text-center">
-                    Login
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to="/login"
+                    className="inline-flex h-11 items-center justify-center rounded-md border border-stone-300 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-900"
+                  >
+                    Log in
                   </Link>
-                  <Link to="/register" className="w-full btn-primary text-sm py-3 rounded-xl text-center">
-                    Sign up
+                  <Link
+                    to="/register"
+                    className="inline-flex h-11 items-center justify-center rounded-md bg-stone-900 text-sm font-medium text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+                  >
+                    Sign up free
                   </Link>
                 </div>
               )}
@@ -296,49 +358,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-    </nav>
+    </header>
   )
 }
-
-// Add these animations to your global CSS or Tailwind config:
-/*
-@keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out;
-}
-
-.animate-gradient {
-  background-size: 200% auto;
-  animation: gradient 3s linear infinite;
-}
-
-.btn-primary {
-  @apply relative px-5 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300;
-}
-
-.btn-secondary {
-  @apply relative px-5 py-2 rounded-xl font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-300;
-}
-*/
