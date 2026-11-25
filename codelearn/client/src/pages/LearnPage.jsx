@@ -64,7 +64,7 @@ export default function LearnPage() {
   return (
     <div className="min-h-[calc(100dvh-4rem)] bg-[#fcfbf8] text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
       {/* ══════════ Sticky page header ══════════ */}
-      <header className="sticky top-16 z-20 border-b border-stone-200 bg-[#fcfbf8]/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
+      <header className="sticky top-16 z-20 border-b border-stone-200 bg-[#fcfbf8] dark:border-stone-800 dark:bg-stone-950">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex min-w-0 items-center gap-4">

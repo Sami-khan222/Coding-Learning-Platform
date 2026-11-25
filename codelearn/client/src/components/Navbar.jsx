@@ -165,7 +165,7 @@ export default function Navbar() {
   if (location.pathname.startsWith('/watch')) return null
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200 ...">
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#fcfbf8] dark:border-stone-800 dark:bg-stone-950">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <Logo />
 
