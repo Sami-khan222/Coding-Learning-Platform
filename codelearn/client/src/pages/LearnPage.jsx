@@ -2,14 +2,69 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import CodeEditor from '../components/CodeEditor'
 import VideoPanel from '../components/VideoPanel'
 
+// Same gutters as the home page
+
+
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+
 const VALID_LANGS = ['python', 'javascript', 'java', 'cpp']
 
+// Same logos as the home page language cards (emojis and per-language colors removed)
 const LANG_META = {
-  python:     { name: 'Python',     emoji: '🐍', color: 'text-emerald-500', gradient: 'from-emerald-500 to-teal-500', bg: 'bg-emerald-500/10', desc: 'General purpose · Data Science · Automation' },
-  javascript: { name: 'JavaScript', emoji: '⚡', color: 'text-amber-500', gradient: 'from-amber-500 to-yellow-500', bg: 'bg-amber-500/10', desc: 'Web Development · Frontend · Backend' },
-  java:       { name: 'Java',       emoji: '☕', color: 'text-orange-500', gradient: 'from-orange-500 to-red-500', bg: 'bg-orange-500/10', desc: 'Enterprise · Android · OOP' },
-  cpp:        { name: 'C++',        emoji: '⚙️', color: 'text-blue-500',  gradient: 'from-blue-500 to-indigo-600', bg: 'bg-blue-500/10', desc: 'Systems · Game Dev · Competitive Coding' },
+  python:     { name: 'Python',     logo: `${DEVICON}/python/python-original.svg`,         desc: 'General purpose · Data Science · Automation',   file: 'main.py' },
+  javascript: { name: 'JavaScript', logo: `${DEVICON}/javascript/javascript-original.svg`, desc: 'Web Development · Frontend · Backend',          file: 'main.js' },
+  java:       { name: 'Java',       logo: `${DEVICON}/java/java-original.svg`,             desc: 'Enterprise · Android · OOP',                    file: 'Main.java' },
+  cpp:        { name: 'C++',        logo: `${DEVICON}/cplusplus/cplusplus-original.svg`,   desc: 'Systems · Game Dev · Competitive Coding',       file: 'main.cpp' },
 }
+
+const BTN_PRIMARY =
+  'inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-stone-900 px-6 text-sm font-medium text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white'
+const BTN_PRIMARY_SM =
+  'inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-stone-900 px-4 text-xs font-medium text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white'
+
+/* ── Small pieces (same as home page) ───────────────────── */
+
+function ArrowRight({ className = 'h-4 w-4' }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <path d="M4 10h12m0 0-5-5m5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function Check({ className = 'h-4 w-4' }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <path d="m4 10.5 4 4 8-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function Eyebrow({ children }) {
+  return (
+    <p className="text-xs font-medium uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+      {children}
+    </p>
+  )
+}
+
+function WindowFrame({ title, children, className = '' }) {
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border border-stone-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.18)] dark:border-stone-800 dark:bg-stone-900 ${className}`}
+    >
+      <div className="flex items-center gap-2 border-b border-stone-200 bg-stone-50 px-4 py-2.5 dark:border-stone-800 dark:bg-stone-900">
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="h-2.5 w-2.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <span className="ml-3 font-mono text-xs text-stone-500">{title}</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/* ── Page ───────────────────────────────────────────────── */
 
 export default function LearnPage() {
   const { lang } = useParams()
@@ -22,243 +77,138 @@ export default function LearnPage() {
   const meta = LANG_META[lang]
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#fcfbf8] text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
 
-      {/* ── Enhanced Page Header with glassmorphism ── */}
-      <div className="sticky top-16 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              {/* Animated icon with gradient background */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-500 to-purple-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${meta.gradient} flex items-center justify-center text-2xl sm:text-3xl shadow-lg transform group-hover:scale-110 transition-all duration-300`}>
-                  {meta.emoji}
-                </div>
-              </div>
-              
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold flex flex-wrap items-center gap-2">
-                  <span className={`bg-gradient-to-r ${meta.gradient} bg-clip-text text-transparent`}>
-                    {meta.name}
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-600 font-normal text-base hidden sm:inline">/</span>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm sm:text-base font-normal">Learning Hub</span>
+      {/* ══════════ Sticky page header ══════════ */}
+      <header className="sticky top-16 z-20 border-b border-stone-200 bg-[#fcfbf8]/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+            {/* Left: language identity */}
+            <div className="flex min-w-0 items-center gap-4">
+              <img src={meta.logo} alt={`${meta.name} logo`} className="h-9 w-9 flex-shrink-0" />
+              <div className="min-w-0">
+                <h1 className="font-serif text-2xl leading-tight tracking-tight text-stone-900 dark:text-stone-50">
+                  {meta.name}
+                  <span className="ml-2 font-sans text-sm text-stone-500">/ Learning hub</span>
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2">
-                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${meta.color.replace('text', 'bg')}`}></span>
-                  {meta.desc}
-                </p>
+                <p className="mt-0.5 truncate text-xs text-stone-500">{meta.desc}</p>
               </div>
             </div>
 
-            {/* Enhanced Quick nav with modern styling */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-gray-400 dark:text-gray-600 font-medium">Quick switch:</span>
-              <div className="flex gap-1.5">
-                {VALID_LANGS.filter(l => l !== lang).map(l => (
-                  <Link
-                    key={l}
-                    to={`/learn/${l}`}
-                    className={`group relative px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 ${
-                      LANG_META[l].bg
-                    } text-gray-600 dark:text-gray-400 hover:text-white dark:hover:text-white overflow-hidden`}
-                  >
-                    <span className="relative z-10 flex items-center gap-1">
-                      <span className="text-sm">{LANG_META[l].emoji}</span>
-                      <span className="hidden sm:inline">{LANG_META[l].name}</span>
-                    </span>
-                    <div className={`absolute inset-0 bg-gradient-to-r ${LANG_META[l].gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-                  </Link>
-                ))}
+            {/* Right: quick switch + quiz CTA */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="hidden items-center gap-1.5 md:flex">
+                <span className="mr-1 text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Switch</span>
+                {VALID_LANGS.filter(l => l !== lang).map(l => {
+                  const m = LANG_META[l]
+                  return (
+                    <Link
+                      key={l}
+                      to={`/learn/${l}`}
+                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-stone-300 px-3 text-xs font-medium text-stone-700 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-900"
+                    >
+                      <img src={m.logo} alt="" className="h-4 w-4" />
+                      {m.name}
+                    </Link>
+                  )
+                })}
               </div>
-              
-              {/* Enhanced Quiz button */}
-              <Link
-                to={`/quiz/${lang}`}
-                className="group relative ml-2 px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center gap-1">
-                  <span>📝</span>
-                  <span>Take Quiz →</span>
-                </span>
+
+              <span aria-hidden className="hidden h-5 w-px bg-stone-200 md:block dark:bg-stone-800" />
+
+              <Link to={`/quiz/${lang}`} className={BTN_PRIMARY_SM}>
+                Take quiz
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
         </div>
+      </header>
+
+      {/* ══════════ Main content ══════════ */}
+<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+  <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+
+    {/* Left: code editor */}
+    <section className="flex min-w-0 flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <Eyebrow>Code editor</Eyebrow>
+        <span className="inline-flex items-center gap-1.5 text-xs text-stone-500">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Ready
+        </span>
       </div>
 
-      {/* ── Main Content: Two Column Layout with enhanced styling ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
-          
-          {/* Left: Code Editor Section */}
-          <div className="flex flex-col gap-4 animate-fade-in-left">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <span className="text-base">🖊️</span>
-                <span>Code Editor</span>
-              </h2>
-              <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-[10px] text-gray-400 dark:text-gray-600">Ready</span>
-              </div>
-            </div>
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
-              <div className="relative rounded-xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-800">
-                <CodeEditor language={lang} />
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-600 text-center flex items-center justify-center gap-2">
-              <span>⚡ Powered by Monaco (VS Code engine)</span>
-              <span className="w-1 h-1 rounded-full bg-gray-400"></span>
-              <span>💡 Write & run code instantly</span>
-            </p>
-          </div>
+      <WindowFrame title={meta.file} className="min-w-0">
+        <CodeEditor language={lang} />
+      </WindowFrame>
 
-          {/* Right: Video Panel Section */}
-          <div className="flex flex-col gap-4 animate-fade-in-right">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <span className="text-base">📹</span>
-                <span>Video Lessons</span>
-              </h2>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-gray-400 dark:text-gray-600">Curated for you</span>
-              </div>
-            </div>
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
-              <div className="relative rounded-xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-800">
-                <VideoPanel language={lang} />
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-600 text-center flex items-center justify-center gap-2">
-              <span>🎯 Hand-picked tutorials</span>
-              <span className="w-1 h-1 rounded-full bg-gray-400"></span>
-              <span>📚 Updated regularly</span>
-            </p>
-          </div>
-        </div>
+      <p className="text-center text-xs text-stone-500">
+        Powered by Monaco · Write &amp; run code instantly
+      </p>
+    </section>
 
-        {/* Enhanced Bottom CTA bar */}
-        <div className="mt-8 sm:mt-10 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-brand-50 via-purple-50 to-brand-50 dark:from-brand-950/30 dark:via-purple-950/30 dark:to-brand-950/30 border border-brand-200 dark:border-brand-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up">
-          <div className="text-center sm:text-left">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🎯</span>
-              <p className="font-bold text-brand-800 dark:text-brand-300 text-sm sm:text-base">
+    {/* Right: video panel (no WindowFrame, so nothing is clipped) */}
+    <section className="flex min-w-0 flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <Eyebrow>Video lessons</Eyebrow>
+        <span className="text-xs text-stone-500">Curated for you</span>
+      </div>
+
+      <div className="min-w-0 max-w-full [&_iframe]:max-w-full [&_img]:max-w-full [&_video]:max-w-full">
+        <VideoPanel language={lang} />
+      </div>
+
+      <p className="text-center text-xs text-stone-500">
+        Hand-picked tutorials · Updated regularly
+      </p>
+    </section>
+  </div>
+        {/* ══════════ Quiz CTA panel (same dark CTA as the home page) ══════════ */}
+        {/* Quiz CTA panel */}
+<div className="mt-10 overflow-hidden rounded-2xl bg-stone-900 sm:mt-12">
+          <div className="flex flex-col items-start justify-between gap-6 px-8 py-10 sm:flex-row sm:items-center sm:px-12 sm:py-12">
+            <div className="min-w-0">
+              <h3 className="font-serif text-2xl tracking-tight text-white sm:text-3xl">
                 Ready to test your {meta.name} knowledge?
+              </h3>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-stone-300">
+                Score 70% or higher on the quiz to earn a certificate you can download and share.
               </p>
             </div>
-            <p className="text-xs sm:text-sm text-brand-600 dark:text-brand-400">
-              Pass the quiz with 70%+ to earn your certificate and showcase your skills.
-            </p>
+
+            <Link
+              to={`/quiz/${lang}`}
+              className="inline-flex h-12 flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-7 text-sm font-medium text-stone-900 transition-colors hover:bg-stone-200"
+            >
+              Take the {meta.name} quiz
+              <ArrowRight />
+            </Link>
           </div>
-          
-          <Link
-            to={`/quiz/${lang}`}
-            className="group relative px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap overflow-hidden"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="text-base">📝</span>
-              <span>Take the {meta.name} Quiz</span>
-              <span className="group-hover:translate-x-0.5 transition-transform duration-200">→</span>
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-600 to-purple-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
-          </Link>
         </div>
 
-        {/* Learning tips section */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
-            <span className="text-lg">💡</span>
-            <div>
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Pro Tip</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">Write code while watching videos</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
-            <span className="text-lg">🤖</span>
-            <div>
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">AI Assistant</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">Ask questions in AI Chat</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
-            <span className="text-lg">🏆</span>
-            <div>
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Certificate</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">Share your achievement</p>
-            </div>
-          </div>
+        {/* ══════════ Learning tips (home page check-list style) ══════════ */}
+        {/* Learning tips */}
+<div className="mt-5 border-t border-stone-200 pt-8 dark:border-stone-800">
+          <Eyebrow>Tips</Eyebrow>
+          <ul className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {[
+              { title: 'Write code while watching', desc: 'Pause the video and try each example in the editor.' },
+              { title: 'Ask the AI tutor', desc: 'Paste your code in AI Chat when you get stuck.' },
+              { title: 'Earn a certificate', desc: 'Pass the quiz and share your achievement.' },
+            ].map(({ title, desc }) => (
+              <li key={title} className="flex items-start gap-3">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                <div>
+                  <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">{desc}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
   )
 }
-
-// Add these animations to your global CSS or Tailwind config:
-/*
-@keyframes fade-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fade-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-left {
-  animation: fade-in-left 0.5s ease-out forwards;
-}
-
-.animate-fade-in-right {
-  animation: fade-in-right 0.5s ease-out forwards;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out forwards;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.hover\:shadow-3xl:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-*/

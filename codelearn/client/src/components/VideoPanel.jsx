@@ -1,491 +1,381 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-// Enhanced Topic display labels with icons
+const API = 'https://coding-learning-platform-4okh.onrender.com/api'
+
 const TOPIC_LABELS = {
-  basics:      '📘 Basics',
-  functions:   '⚡ Functions',
-  oop:         '🏗️ OOP',
-  dom:         '🌐 DOM',
-  async:       '⏳ Async',
-  es6:         '✨ ES6+',
-  collections: '📦 Collections',
-  pointers:    '🎯 Pointers',
-  stl:         '🔧 STL',
+  basics: 'Basics',
+  functions: 'Functions',
+  oop: 'OOP',
+  dom: 'DOM',
+  async: 'Async',
+  es6: 'ES6+',
+  collections: 'Collections',
+  pointers: 'Pointers',
+  stl: 'STL',
 }
 
-const LEVEL_STYLES = {
-  Beginner:     'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30',
-  Intermediate: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-400 border border-amber-500/30',
-  Advanced:     'bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-400 border border-red-500/30',
+const LEVEL_DOT = {
+  Beginner: 'bg-emerald-500',
+  Intermediate: 'bg-amber-500',
+  Advanced: 'bg-rose-500',
 }
 
-// ── Enhanced Skeleton loader card ──
+const chip =
+  'inline-flex items-center gap-1.5 rounded-md border border-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-600 dark:border-stone-800 dark:text-stone-400'
+
+/* ───────────── Icons ───────────── */
+
+const iconProps = {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+}
+
+const PlayIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-5 w-5" aria-hidden>
+    <path d="M7 4.5v15l12-7.5-12-7.5Z" />
+  </svg>
+)
+const CloseIcon = () => (
+  <svg {...iconProps} className="h-4 w-4">
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+)
+const AlertIcon = () => (
+  <svg {...iconProps} className="h-5 w-5">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7.5v5M12 16.2v.1" />
+  </svg>
+)
+const ExternalIcon = () => (
+  <svg {...iconProps} className="h-3.5 w-3.5">
+    <path d="M14 5h5v5M19 5l-8 8M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" />
+  </svg>
+)
+
+/* ───────────── Pieces ───────────── */
+
+function LevelTag({ level, className = '' }) {
+  if (!level) return null
+  return (
+    <span className={`${chip} bg-white dark:bg-stone-900 ${className}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${LEVEL_DOT[level] || 'bg-stone-400'}`} />
+      {level}
+    </span>
+  )
+}
+
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gray-900/50 border border-gray-800 animate-pulse">
-      <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900" />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-800 rounded-lg w-full" />
-        <div className="h-4 bg-gray-800 rounded-lg w-3/4" />
-        <div className="flex justify-between mt-3">
-          <div className="h-3 bg-gray-800 rounded-lg w-1/3" />
-          <div className="h-3 bg-gray-800 rounded-lg w-1/4" />
-        </div>
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
+      <div className="aspect-video animate-pulse bg-stone-100 dark:bg-stone-800" />
+      <div className="space-y-2.5 p-4">
+        <div className="h-3.5 w-full animate-pulse rounded bg-stone-100 dark:bg-stone-800" />
+        <div className="h-3.5 w-2/3 animate-pulse rounded bg-stone-100 dark:bg-stone-800" />
+        <div className="h-3 w-24 animate-pulse rounded bg-stone-100 pt-1.5 dark:bg-stone-800" />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
     </div>
   )
 }
 
-// ── Enhanced Close icon ──
-function CloseIcon() {
+function FilterPill({ active, onClick, children }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform group-hover:rotate-90 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+        active
+          ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900'
+          : 'border-stone-300 text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 
-// ── Main VideoPanel with enhanced UI ──
-export default function VideoPanel({ language = 'python' }) {
-  const [topics,       setTopics]       = useState([])
-  const [selectedTopic, setSelectedTopic] = useState('all')
-  const [videos,       setVideos]       = useState([])
-  const [loading,      setLoading]      = useState(true)
-  const [error,        setError]        = useState('')
-  const [modalVideo,   setModalVideo]   = useState(null)
-  const [imgErrors,    setImgErrors]    = useState({})
-  const [source,       setSource]       = useState('')   // 'youtube' | 'fallback'
+/* ───────────── Video modal ───────────── */
 
-  // Fetch topic list when language changes
+function VideoModal({ video, onClose }) {
+  const closeRef = useRef(null)
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/70 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={video.title}
+        className="flex w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-stone-200 bg-[#fcfbf8] shadow-2xl dark:border-stone-800 dark:bg-stone-950"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-stone-200 px-5 py-4 dark:border-stone-800">
+          <div className="min-w-0">
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-stone-900 sm:text-base dark:text-stone-50">
+              {video.title}
+            </h3>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+              <span className="truncate">{video.channel}</span>
+              <LevelTag level={video.level} />
+              {video.topic && <span className={chip}>{TOPIC_LABELS[video.topic] || video.topic}</span>}
+            </div>
+          </div>
+          <button
+            ref={closeRef}
+            onClick={onClose}
+            aria-label="Close video"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:hover:bg-stone-800 dark:hover:text-white"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
+        <div className="aspect-video bg-black">
+          <iframe
+            src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+            title={video.title}
+            className="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+
+        <div className="flex flex-col-reverse gap-3 border-t border-stone-200 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-stone-800">
+          <p className="text-xs text-stone-500">
+            Press{' '}
+            <kbd className="rounded border border-stone-300 bg-white px-1.5 py-0.5 font-mono text-[10px] text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+              Esc
+            </kbd>{' '}
+            to close
+          </p>
+          <a
+            href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-stone-300 px-3.5 text-xs font-medium text-stone-800 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-900"
+          >
+            Open on YouTube
+            <ExternalIcon />
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ───────────── Video panel ───────────── */
+
+export default function VideoPanel({ language = 'python' }) {
+  const [topics, setTopics] = useState([])
+  const [selectedTopic, setSelectedTopic] = useState('all')
+  const [videos, setVideos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [modalVideo, setModalVideo] = useState(null)
+  const [imgErrors, setImgErrors] = useState({})
+  const [source, setSource] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
+
+  const lastCardRef = useRef(null)
+
+  // Language changed: reset filters and load the topic list
   useEffect(() => {
     setSelectedTopic('all')
-    setVideos([])
     setTopics([])
     setImgErrors({})
 
-    const fetchTopics = async () => {
+    const ctrl = new AbortController()
+    ;(async () => {
       try {
-        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/videos/${language}/topics`)
+        const res = await fetch(`${API}/videos/${encodeURIComponent(language)}/topics`, { signal: ctrl.signal })
         const data = await res.json()
         if (res.ok) setTopics(data.topics || [])
       } catch {
-        // Topics list failed — non-critical, pills just won't show
+        // Topic list is non-critical
       }
-    }
-    fetchTopics()
+    })()
+    return () => ctrl.abort()
   }, [language])
 
-  // Fetch videos when language or topic changes
+  // Load videos for the current language + topic
   useEffect(() => {
-    const fetchVideos = async () => {
+    const ctrl = new AbortController()
+    ;(async () => {
       setLoading(true)
       setError('')
-
       try {
-        const topicParam = selectedTopic !== 'all' ? `?topic=${selectedTopic}` : ''
-        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/videos/${language}${topicParam}`)
-        const data = await res.json()
-
-        if (!res.ok) throw new Error(data.message || 'Failed to load videos')
-
+        const query = selectedTopic !== 'all' ? `?topic=${encodeURIComponent(selectedTopic)}` : ''
+        const res = await fetch(`${API}/videos/${encodeURIComponent(language)}${query}`, { signal: ctrl.signal })
+        let data = {}
+        try {
+          data = await res.json()
+        } catch {}
+        if (!res.ok) throw new Error(data.message || `Failed to load videos (${res.status})`)
         setVideos(data.videos || [])
         setSource(data.source || '')
       } catch (err) {
-        setError(err.message)
+        if (err.name === 'AbortError') return
+        setError(err.message || 'Failed to load videos')
         setVideos([])
       } finally {
-        setLoading(false)
+        if (!ctrl.signal.aborted) setLoading(false)
       }
-    }
-    fetchVideos()
-  }, [language, selectedTopic])
+    })()
+    return () => ctrl.abort()
+  }, [language, selectedTopic, reloadKey])
 
-  // Close modal on Escape key
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') setModalVideo(null) }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
+  const openVideo = (video, el) => {
+    lastCardRef.current = el
+    setModalVideo(video)
+  }
 
-  // Prevent body scroll when modal open
-  useEffect(() => {
-    document.body.style.overflow = modalVideo ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [modalVideo])
-
-  const handleImgError = (youtubeId) =>
-    setImgErrors(prev => ({ ...prev, [youtubeId]: true }))
+  const closeVideo = () => {
+    setModalVideo(null)
+    lastCardRef.current?.focus()
+  }
 
   return (
-    <div className="flex flex-col gap-5 animate-fade-in">
-
-      {/* ── Enhanced Header ── */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-base shadow-lg">
-            📹
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
-              Video Lessons
-              {!loading && (
-                <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-gray-800 text-gray-400">
-                  {videos.length} video{videos.length !== 1 ? 's' : ''}
-                </span>
-              )}
-            </h2>
-          </div>
+    <div className="flex flex-col gap-6">
+      {/* ───── Header ───── */}
+      <div className="flex items-end justify-between gap-3 border-b border-stone-200 pb-4 dark:border-stone-800">
+        <div>
+          <h2 className="font-serif text-xl tracking-tight text-stone-900 dark:text-stone-50">Video lessons</h2>
+          {!loading && !error && (
+            <p className="mt-1 text-xs text-stone-500">
+              {videos.length} {videos.length === 1 ? 'video' : 'videos'}
+            </p>
+          )}
         </div>
-        
-        {/* Enhanced Source badge */}
-        {source === 'youtube' && (
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            <span className="relative flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 text-red-400 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-              🔴 Live YouTube
-            </span>
-          </div>
-        )}
-        {source === 'fallback' && (
-          <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-gray-700/50 to-gray-800/50 border border-gray-700 text-gray-400 font-medium backdrop-blur-sm">
-            📁 Curated Library
-          </span>
-        )}
+
+        {source === 'youtube' && <span className={chip}>Live from YouTube</span>}
+        {source === 'fallback' && <span className={chip}>Curated library</span>}
       </div>
 
-      {/* ── Enhanced Topic Filter Pills ── */}
+      {/* ───── Topic filters ───── */}
       {topics.length > 0 && (
-        <div className="flex flex-wrap gap-2 animate-slide-down">
-          {/* All topics pill */}
-          <button
-            onClick={() => setSelectedTopic('all')}
-            className={`group relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105
-              ${selectedTopic === 'all'
-                ? 'bg-gradient-to-r from-brand-600 to-purple-600 text-white shadow-lg'
-                : 'bg-gray-800/50 backdrop-blur-sm text-gray-400 hover:bg-gray-700 hover:text-gray-200 border border-gray-700'
-              }`}
-          >
-            <span className="relative z-10 flex items-center gap-1.5">
-              <span>🎯</span>
-              <span>All Topics</span>
-            </span>
-            {selectedTopic === 'all' && (
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-600 to-purple-600 rounded-full blur-md opacity-50"></div>
-            )}
-          </button>
-
-          {topics.map(topic => (
-            <button
-              key={topic}
-              onClick={() => setSelectedTopic(topic)}
-              className={`group relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105
-                ${selectedTopic === topic
-                  ? 'bg-gradient-to-r from-brand-600 to-purple-600 text-white shadow-lg'
-                  : 'bg-gray-800/50 backdrop-blur-sm text-gray-400 hover:bg-gray-700 hover:text-gray-200 border border-gray-700'
-                }`}
-            >
-              <span className="relative z-10">{TOPIC_LABELS[topic] || topic}</span>
-              {selectedTopic === topic && (
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-600 to-purple-600 rounded-full blur-md opacity-50"></div>
-              )}
-            </button>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by topic">
+          <FilterPill active={selectedTopic === 'all'} onClick={() => setSelectedTopic('all')}>
+            All topics
+          </FilterPill>
+          {topics.map((topic) => (
+            <FilterPill key={topic} active={selectedTopic === topic} onClick={() => setSelectedTopic(topic)}>
+              {TOPIC_LABELS[topic] || topic}
+            </FilterPill>
           ))}
         </div>
       )}
 
-      {/* ── Loading Skeletons with improved animation ── */}
+      {/* ───── Loading ───── */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2" aria-busy="true">
+          {[0, 1, 2, 3].map((i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       )}
 
-      {/* ── Enhanced Error ── */}
+      {/* ───── Error ───── */}
       {!loading && error && (
-        <div className="text-center py-12 px-4 animate-shake">
-          <div className="relative inline-block mb-4">
-            <div className="text-5xl">⚠️</div>
-            <div className="absolute -top-2 -right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          </div>
-          <div className="bg-red-500/10 backdrop-blur-sm border border-red-500/30 rounded-xl px-4 py-3 max-w-md mx-auto">
-            <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-stone-200 bg-white px-6 py-12 text-center dark:border-stone-800 dark:bg-stone-900">
+          <span className="text-rose-600 dark:text-rose-400">
+            <AlertIcon />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-stone-900 dark:text-stone-50">Couldn't load videos</p>
+            <p className="mt-1 max-w-md text-xs text-stone-500">{error}</p>
           </div>
           <button
-            onClick={() => setSelectedTopic(selectedTopic)}
-            className="mt-4 px-4 py-2 rounded-lg text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 transition-all duration-300 hover:scale-105"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="inline-flex h-9 items-center rounded-md border border-stone-300 px-4 text-xs font-medium text-stone-800 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
           >
-            🔄 Retry
+            Try again
           </button>
         </div>
       )}
 
-      {/* ── Enhanced No videos found ── */}
+      {/* ───── Empty ───── */}
       {!loading && !error && videos.length === 0 && (
-        <div className="text-center py-16 animate-fade-in-up">
-          <div className="relative inline-block mb-4">
-            <div className="text-6xl">📭</div>
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gray-700 rounded-full"></div>
-          </div>
-          <p className="text-gray-500 text-sm font-medium">No videos found for this topic</p>
-          <button
-            onClick={() => setSelectedTopic('all')}
-            className="mt-4 text-xs text-brand-400 hover:text-brand-300 transition-all duration-300 inline-flex items-center gap-1 group"
-          >
-            <span>Show all videos</span>
-            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-          </button>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-stone-300 px-6 py-14 text-center dark:border-stone-700">
+          <p className="text-sm font-semibold text-stone-900 dark:text-stone-50">No videos for this topic yet</p>
+          <p className="text-xs text-stone-500">Try a different topic, or view everything for this language.</p>
+          {selectedTopic !== 'all' && (
+            <button
+              onClick={() => setSelectedTopic('all')}
+              className="mt-1 text-xs font-medium text-stone-900 underline-offset-4 hover:underline dark:text-stone-100"
+            >
+              Show all videos
+            </button>
+          )}
         </div>
       )}
 
-      {/* ── Enhanced Video Cards Grid ── */}
+      {/* ───── Grid ───── */}
       {!loading && !error && videos.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {videos.map((video, index) => (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {videos.map((video) => (
             <button
               key={video.youtubeId}
-              onClick={() => setModalVideo(video)}
-              className="group relative text-left rounded-xl overflow-hidden border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-brand-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-500 animate-fade-in-up"
-              style={{ animationDelay: `${index * 50}ms` }}
+              onClick={(e) => openVideo(video, e.currentTarget)}
+              className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white text-left transition-colors hover:border-stone-400 dark:border-stone-800 dark:bg-stone-900 dark:hover:border-stone-600"
             >
-              {/* Thumbnail container */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 aspect-video">
+              <div className="relative aspect-video overflow-hidden bg-stone-100 dark:bg-stone-800">
                 {!imgErrors[video.youtubeId] ? (
                   <img
                     src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                    alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={() => handleImgError(video.youtubeId)}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    onError={() => setImgErrors((prev) => ({ ...prev, [video.youtubeId]: true }))}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                    <span className="text-6xl opacity-20">📹</span>
+                  <div className="flex h-full w-full items-center justify-center text-stone-400">
+                    <PlayIcon />
                   </div>
                 )}
 
-                {/* Enhanced Play overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-red-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                    <div className="relative w-14 h-14 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                      <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Enhanced Level badge */}
-                <div className="absolute top-3 right-3">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm ${LEVEL_STYLES[video.level] || LEVEL_STYLES.Beginner}`}>
-                    {video.level}
+                <div className="absolute inset-0 flex items-center justify-center bg-stone-950/30 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-stone-900">
+                    <PlayIcon />
                   </span>
                 </div>
 
-                {/* Duration badge (placeholder for future enhancement) */}
-                <div className="absolute bottom-3 right-3">
-                  <span className="text-xs px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-gray-300 font-mono">
-                    10:23
-                  </span>
-                </div>
+                <LevelTag level={video.level} className="absolute left-2.5 top-2.5 shadow-sm" />
               </div>
 
-              {/* Enhanced Card info */}
-              <div className="p-4 bg-gradient-to-br from-gray-900 to-gray-900/50">
-                <p className="text-sm font-semibold text-gray-200 leading-snug line-clamp-2 group-hover:text-brand-400 transition-colors duration-300">
+              <div className="flex flex-1 flex-col p-4">
+                <p className="line-clamp-2 text-sm font-semibold leading-snug text-stone-900 dark:text-stone-50">
                   {video.title}
                 </p>
-                <div className="flex items-center justify-between gap-2 mt-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-500">📺</span>
-                    <span className="text-xs text-gray-400 truncate">{video.channel}</span>
-                  </div>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="min-w-0 truncate text-xs text-stone-500">{video.channel}</span>
                   {video.topic && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-800/50 backdrop-blur-sm text-gray-400 whitespace-nowrap shrink-0 border border-gray-700">
-                      {TOPIC_LABELS[video.topic] || video.topic}
-                    </span>
+                    <span className={`${chip} shrink-0`}>{TOPIC_LABELS[video.topic] || video.topic}</span>
                   )}
                 </div>
               </div>
-
-              {/* Hover gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-500/0 via-transparent to-brand-500/0 group-hover:from-brand-500/5 group-hover:to-brand-500/5 transition-all duration-300 pointer-events-none"></div>
             </button>
           ))}
         </div>
       )}
 
-      {/* ── Enhanced Video Modal ── */}
-      {modalVideo && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
-          onClick={(e) => { if (e.target === e.currentTarget) setModalVideo(null) }}
-        >
-          <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl overflow-hidden shadow-2xl border border-gray-800 animate-scale-up">
-
-            {/* Enhanced Modal header */}
-            <div className="flex items-start justify-between p-5 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800/50">
-              <div className="pr-8 min-w-0">
-                <h3 className="text-white font-bold text-base leading-snug line-clamp-2">
-                  {modalVideo.title}
-                </h3>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-gray-500 text-xs">📺</span>
-                    <p className="text-gray-400 text-xs">{modalVideo.channel}</p>
-                  </div>
-                  {modalVideo.level && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${LEVEL_STYLES[modalVideo.level]}`}>
-                      {modalVideo.level}
-                    </span>
-                  )}
-                  {modalVideo.topic && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-400">
-                      {TOPIC_LABELS[modalVideo.topic] || modalVideo.topic}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setModalVideo(null)}
-                className="group shrink-0 p-2 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-300 hover:scale-110"
-                aria-label="Close video"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            {/* YouTube embed with loading state */}
-            <div className="aspect-video bg-black relative">
-              <iframe
-                src={`https://www.youtube.com/embed/${modalVideo.youtubeId}?autoplay=1&rel=0&modestbranding=1&color=white`}
-                title={modalVideo.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            {/* Enhanced Modal footer */}
-            <div className="flex items-center justify-between px-5 py-4 bg-gray-900/50 border-t border-gray-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">💡 Pro tip:</span>
-                <span className="text-xs text-gray-400">Use keyboard shortcuts for faster learning</span>
-              </div>
-              <a
-                href={`https://www.youtube.com/watch?v=${modalVideo.youtubeId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-all duration-300 hover:gap-2"
-              >
-                <span>Open in YouTube</span>
-                <span className="group-hover:translate-x-0.5 transition-transform">↗</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {modalVideo && <VideoModal video={modalVideo} onClose={closeVideo} />}
     </div>
   )
 }
-
-// Add these to your global CSS:
-/*
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scale-up {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.4s ease-out forwards;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out;
-}
-
-.animate-scale-up {
-  animation: scale-up 0.3s ease-out;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-shake {
-  animation: shake 0.3s ease-in-out;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-*/

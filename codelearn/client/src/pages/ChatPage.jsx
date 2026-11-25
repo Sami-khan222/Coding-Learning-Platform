@@ -1,31 +1,99 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+const API = 'https://coding-learning-platform-4okh.onrender.com/api'
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+const MAX_LEN = 500
+
 const LANGUAGES = [
-  { value: 'general',    label: '💬 General',    placeholder: 'Ask anything about coding...', gradient: 'from-purple-500 to-pink-500' },
-  { value: 'python',     label: '🐍 Python',     placeholder: 'Ask about Python...', gradient: 'from-emerald-500 to-teal-500' },
-  { value: 'javascript', label: '⚡ JavaScript', placeholder: 'Ask about JavaScript...', gradient: 'from-amber-500 to-yellow-500' },
-  { value: 'java',       label: '☕ Java',        placeholder: 'Ask about Java...', gradient: 'from-orange-500 to-red-500' },
-  { value: 'cpp',        label: '⚙️ C++',        placeholder: 'Ask about C++...', gradient: 'from-blue-500 to-indigo-500' },
+  { value: 'general', label: 'General', name: 'coding', placeholder: 'Ask anything about coding…', logo: null },
+  { value: 'python', label: 'Python', name: 'Python', placeholder: 'Ask about Python…', logo: `${DEVICON}/python/python-original.svg` },
+  { value: 'javascript', label: 'JavaScript', name: 'JavaScript', placeholder: 'Ask about JavaScript…', logo: `${DEVICON}/javascript/javascript-original.svg` },
+  { value: 'java', label: 'Java', name: 'Java', placeholder: 'Ask about Java…', logo: `${DEVICON}/java/java-original.svg` },
+  { value: 'cpp', label: 'C++', name: 'C++', placeholder: 'Ask about C++…', logo: `${DEVICON}/cplusplus/cplusplus-original.svg` },
 ]
 
-// ── Typing indicator with enhanced animation ────────────────────────
+const SUGGESTIONS = [
+  'What is a for loop?',
+  'How do I define a function?',
+  'Explain OOP concepts',
+  'What are common errors?',
+]
+
+/* ───────────── Icons ───────────── */
+
+const iconProps = {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+}
+
+const SendIcon = () => (
+  <svg {...iconProps} className="h-4 w-4">
+    <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
+  </svg>
+)
+const TrashIcon = () => (
+  <svg {...iconProps} className="h-3.5 w-3.5">
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3" />
+  </svg>
+)
+const SparkleIcon = ({ className = 'h-4 w-4' }) => (
+  <svg {...iconProps} className={className}>
+    <path d="M12 3.5 13.9 9l5.6 1.9-5.6 1.9L12 18.5l-1.9-5.7-5.6-1.9L10.1 9 12 3.5Z" />
+    <path d="M19 3v3M20.5 4.5h-3" />
+  </svg>
+)
+const ChevronIcon = () => (
+  <svg {...iconProps} className="h-3.5 w-3.5">
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
+const AlertIcon = () => (
+  <svg {...iconProps} className="h-4 w-4 shrink-0">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7.5v5M12 16.2v.1" />
+  </svg>
+)
+
+/* ───────────── Avatars ───────────── */
+
+function TutorAvatar({ className = 'h-8 w-8' }) {
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-md bg-stone-900 text-indigo-300 dark:bg-stone-100 dark:text-indigo-600 ${className}`}
+    >
+      <SparkleIcon className="h-4 w-4" />
+    </span>
+  )
+}
+
+function UserAvatar({ name }) {
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-300 bg-stone-100 text-xs font-semibold text-stone-700 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200">
+      {name?.charAt(0).toUpperCase() || 'U'}
+    </span>
+  )
+}
+
+/* ───────────── Typing indicator ───────────── */
+
 function TypingIndicator() {
   return (
-    <div className="flex items-end gap-3 mb-4 animate-fade-in-up">
-      <div className="relative">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-base shadow-lg">
-          🤖
-        </div>
-        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
-      </div>
-      <div className="bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-2xl rounded-bl-sm px-5 py-3">
-        <div className="flex gap-1.5 items-center h-5">
-          {[0, 1, 2].map(i => (
+    <div className="flex items-end gap-3" role="status" aria-label="Tutor is typing">
+      <TutorAvatar />
+      <div className="rounded-xl rounded-bl-sm border border-stone-200 bg-white px-4 py-3.5 dark:border-stone-800 dark:bg-stone-900">
+        <div className="flex gap-1">
+          {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="w-2 h-2 bg-gradient-to-r from-brand-400 to-purple-400 rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.8s' }}
+              className="h-1.5 w-1.5 animate-pulse rounded-full bg-stone-400"
+              style={{ animationDelay: `${i * 0.2}s` }}
             />
           ))}
         </div>
@@ -34,421 +102,375 @@ function TypingIndicator() {
   )
 }
 
-// ── Enhanced Message bubble with syntax highlighting ─────────────────
-function MessageBubble({ msg }) {
-  const isUser = msg.role === 'user'
+/* ───────────── Message rendering ───────────── */
 
-  // Enhanced render with better code formatting
-  const renderContent = (text) => {
-    const parts = text.split(/(```[\s\S]*?```)/g)
-    return parts.map((part, i) => {
-      if (part.startsWith('```')) {
-        const lines = part.slice(3).split('\n')
-        const lang = lines[0].trim()
-        const code = lines.slice(1).join('\n').replace(/```$/, '').trim()
-        return (
-          <div key={i} className="relative group mt-2 mb-2">
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button 
-                onClick={() => navigator.clipboard.writeText(code)}
-                className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
-              >
-                📋 Copy
-              </button>
-            </div>
-            <pre className="bg-gradient-to-br from-gray-950 to-gray-900 border border-gray-700 rounded-xl p-4 overflow-x-auto text-xs font-mono text-emerald-400 whitespace-pre-wrap shadow-inner">
-              {lang && <div className="text-gray-500 text-xs mb-2 uppercase tracking-wider">{lang}</div>}
-              <code>{code}</code>
-            </pre>
-          </div>
-        )
-      }
-      // Enhanced inline code rendering
-      const inlineParts = part.split(/(`[^`]+`)/g)
-      return (
-        <span key={i}>
-          {inlineParts.map((p, j) =>
-            p.startsWith('`') && p.endsWith('`')
-              ? <code key={j} className="bg-gray-800 text-emerald-300 px-1.5 py-0.5 rounded-md text-xs font-mono border border-gray-700">{p.slice(1, -1)}</code>
-              : <span key={j} className="leading-relaxed">{p}</span>
-          )}
-        </span>
-      )
-    })
+function CodeBlock({ lang, code }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {}
   }
-
   return (
-    <div className={`flex items-end gap-3 mb-5 animate-fade-in-up ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      {/* Enhanced Avatar with gradient */}
-      {!isUser && (
-        <div className="relative group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-base shadow-lg group-hover:scale-110 transition-transform duration-300">
-            🤖
-          </div>
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
-        </div>
-      )}
-      {isUser && (
-        <div className="relative group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center text-base shadow-lg group-hover:scale-110 transition-transform duration-300">
-            👤
-          </div>
-        </div>
-      )}
+    <div className="my-3 overflow-hidden rounded-lg border border-stone-800 bg-stone-950">
+      <div className="flex items-center justify-between border-b border-stone-800 px-3.5 py-1.5">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-stone-500">{lang || 'code'}</span>
+        <button onClick={copy} className="text-[11px] font-medium text-stone-400 transition-colors hover:text-white">
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre className="overflow-x-auto px-4 py-3.5 font-mono text-xs leading-relaxed text-stone-200">
+        <code>{code}</code>
+      </pre>
+    </div>
+  )
+}
 
-      {/* Enhanced Bubble with gradient borders */}
-      <div className={`max-w-[85%] px-5 py-3 rounded-2xl text-sm leading-relaxed shadow-lg transition-all duration-300 hover:shadow-xl
-        ${isUser
-          ? 'bg-gradient-to-r from-brand-600 to-purple-600 text-white rounded-br-sm'
-          : 'bg-gray-800/80 backdrop-blur-sm border border-gray-700 text-gray-200 rounded-bl-sm hover:border-brand-500/30'
-        }`}
-      >
-        <div className="prose prose-invert max-w-none">
-          {renderContent(msg.content)}
+function MessageContent({ text }) {
+  const parts = text.split(/(```[\s\S]*?```)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('```')) {
+      const lines = part.slice(3).split('\n')
+      const lang = lines[0].trim()
+      const code = lines.slice(1).join('\n').replace(/```$/, '').trim()
+      return <CodeBlock key={i} lang={lang} code={code} />
+    }
+    return (
+      <span key={i}>
+        {part.split(/(`[^`]+`)/g).map((p, j) =>
+          p.startsWith('`') && p.endsWith('`') && p.length > 2 ? (
+            <code
+              key={j}
+              className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[12px] text-stone-800 dark:bg-stone-800 dark:text-stone-200"
+            >
+              {p.slice(1, -1)}
+            </code>
+          ) : (
+            <span key={j} className="whitespace-pre-wrap">
+              {p}
+            </span>
+          ),
+        )}
+      </span>
+    )
+  })
+}
+
+function MessageBubble({ msg, userName }) {
+  const isUser = msg.role === 'user'
+  return (
+    <div className={`flex items-end gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
+      {isUser ? <UserAvatar name={userName} /> : <TutorAvatar />}
+
+      <div className={`flex max-w-[85%] flex-col sm:max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+        <div
+          className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${
+            isUser
+              ? 'rounded-br-sm bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900'
+              : 'rounded-bl-sm border border-stone-200 bg-white text-stone-800 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200'
+          }`}
+        >
+          <MessageContent text={msg.content} />
         </div>
-        <div className={`text-xs mt-2 flex items-center gap-1 ${isUser ? 'text-brand-200' : 'text-gray-500'}`}>
-          <span>🕐</span>
-          {msg.timestamp
-            ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            : ''}
-        </div>
+        {msg.timestamp && (
+          <p className="mt-1.5 px-1 text-[10px] text-stone-400">
+            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
       </div>
     </div>
   )
 }
 
-// ── Enhanced Send icon with animation ────────────────────────────
-function SendIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-300" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-    </svg>
-  )
-}
+/* ───────────── Page ───────────── */
 
-// ── Main ChatPage with enhanced UI ─────────────────────────────────
 export default function ChatPage() {
   const { token, user } = useAuth()
 
-  const [language,    setLanguage]    = useState('general')
-  const [messages,    setMessages]    = useState([])
-  const [input,       setInput]       = useState('')
-  const [typing,      setTyping]      = useState(false)
-  const [loadingHist, setLoadingHist] = useState(true)
-  const [error,       setError]       = useState('')
-  const messagesEndRef = useRef(null)
-  const inputRef       = useRef(null)
+  const [language, setLanguage] = useState('general')
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+  const [typing, setTyping] = useState(false)
+  const [loadingHist, setLoadingHist] = useState(Boolean(token))
+  const [error, setError] = useState('')
 
-  const currentLang = LANGUAGES.find(l => l.value === language) || LANGUAGES[0]
+  const endRef = useRef(null)
+  const inputRef = useRef(null)
 
-  // Auto-scroll to bottom on new messages
+  const currentLang = LANGUAGES.find((l) => l.value === language) || LANGUAGES[0]
+
+  const resizeInput = () => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 128) + 'px'
+  }
+
+  // Keep the newest message in view
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, typing])
 
-  // Load chat history when language changes
+  // Load history for the selected language
   useEffect(() => {
-    const fetchHistory = async () => {
+    setMessages([])
+    setError('')
+    if (!token) {
+      setLoadingHist(false)
+      return
+    }
+
+    const ctrl = new AbortController()
+    ;(async () => {
       setLoadingHist(true)
-      setMessages([])
-      setError('')
       try {
-        const res  = await fetch(`https://coding-learning-platform-4okh.onrender.com/api/chat/history?language=${language}`, {
+        const res = await fetch(`${API}/chat/history?language=${encodeURIComponent(language)}`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: ctrl.signal,
         })
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
         if (res.ok) setMessages(data.messages || [])
       } catch {
-        // History load failure is non-critical
+        // History is non-critical
       } finally {
-        setLoadingHist(false)
+        if (!ctrl.signal.aborted) setLoadingHist(false)
       }
-    }
-    fetchHistory()
+    })()
+    return () => ctrl.abort()
   }, [language, token])
 
-  // Send message
   const sendMessage = useCallback(async () => {
     const text = input.trim()
-    if (!text || typing) return
+    if (!text || typing || !token) return
 
     const userMsg = { role: 'user', content: text, timestamp: new Date().toISOString() }
-    setMessages(prev => [...prev, userMsg])
+    setMessages((prev) => [...prev, userMsg])
     setInput('')
+    requestAnimationFrame(resizeInput)
     setTyping(true)
     setError('')
 
     try {
-      const res  = await fetch('https://coding-learning-platform-4okh.onrender.com/api/chat/message', {
-        method:  'POST',
+      const res = await fetch(`${API}/chat/message`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({ message: text, language }),
+        body: JSON.stringify({ message: text, language }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.message || 'Failed to get a response')
 
-      if (!res.ok) throw new Error(data.message || 'Failed to get response')
-
-      const aiMsg = { role: 'assistant', content: data.reply, timestamp: new Date().toISOString() }
-      setMessages(prev => [...prev, aiMsg])
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply, timestamp: new Date().toISOString() }])
     } catch (err) {
-      setError(err.message)
-      // Remove the user message if request failed
-      setMessages(prev => prev.slice(0, -1))
+      setError(err.message || 'Something went wrong. Please try again.')
+      // Roll back the optimistic message and give the text back to the user
+      setMessages((prev) => prev.slice(0, -1))
+      setInput(text)
+      requestAnimationFrame(resizeInput)
     } finally {
       setTyping(false)
       inputRef.current?.focus()
     }
   }, [input, typing, token, language])
 
-  // Send on Enter (Shift+Enter for newline)
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault()
       sendMessage()
     }
   }
 
-  // Clear history
   const clearHistory = async () => {
     if (!window.confirm('Clear all chat history for this language?')) return
+    setError('')
     try {
-      await fetch(`https://coding-learning-platform-4okh.onrender.com/api/chat/history?language=${language}`, {
-        method:  'DELETE',
+      const res = await fetch(`${API}/chat/history?language=${encodeURIComponent(language)}`, {
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
+      if (!res.ok) throw new Error('Failed to clear history.')
       setMessages([])
-    } catch {
-      alert('Failed to clear history.')
+    } catch (err) {
+      setError(err.message || 'Failed to clear history.')
     }
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-
-      {/* ── Enhanced Top bar with glassmorphism ── */}
-      <div className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 shrink-0 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform duration-300">
-              🤖
-            </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-gray-900"></div>
-          </div>
-          <div>
-            <h1 className="text-white font-bold text-base leading-none bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              AI Coding Tutor
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-[#fcfbf8] dark:bg-stone-950">
+      {/* ───── Top bar ───── */}
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-stone-200 px-4 py-3 sm:px-6 dark:border-stone-800">
+        <div className="flex min-w-0 items-center gap-3">
+          <TutorAvatar className="h-9 w-9" />
+          <div className="min-w-0">
+            <h1 className="truncate font-serif text-lg leading-tight tracking-tight text-stone-900 dark:text-stone-50">
+              AI tutor
             </h1>
-            <p className="text-gray-500 text-xs mt-1">Powered by Gemini 2.5 Flash</p>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 ml-2 px-2 py-1 bg-green-500/10 rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs text-green-500 font-medium">Online</span>
+            <p className="truncate text-[11px] text-stone-500">Powered by Gemini 2.5 Flash</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Enhanced Language selector with gradient border */}
+        <div className="flex shrink-0 items-center gap-2">
           <div className="relative">
+            <label htmlFor="chat-language" className="sr-only">
+              Language
+            </label>
             <select
+              id="chat-language"
               value={language}
-              onChange={e => setLanguage(e.target.value)}
-              className="appearance-none text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer hover:border-brand-500 transition-all duration-300"
-              style={{ backgroundImage: `linear-gradient(135deg, ${currentLang.gradient})` }}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="h-9 cursor-pointer appearance-none rounded-md border border-stone-300 bg-white pl-3 pr-8 text-xs font-medium text-stone-800 transition-colors hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-900/30 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800 dark:focus-visible:ring-stone-100/30"
             >
-              {LANGUAGES.map(l => (
-                <option key={l.value} value={l.value} className="bg-gray-800">{l.label}</option>
+              {LANGUAGES.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
               ))}
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              ▼
-            </div>
+            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400">
+              <ChevronIcon />
+            </span>
           </div>
 
-          {/* Enhanced Clear history button */}
           {messages.length > 0 && (
             <button
               onClick={clearHistory}
-              className="group text-xs text-gray-500 hover:text-red-400 transition-all duration-300 px-2 sm:px-3 py-1.5 rounded-xl hover:bg-red-500/10"
               title="Clear chat history"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
             >
-              <span className="flex items-center gap-1">
-                🗑️ <span className="hidden sm:inline">Clear</span>
-              </span>
+              <TrashIcon />
+              <span className="hidden sm:inline">Clear</span>
             </button>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* ── Messages area with custom scrollbar ── */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-0 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-
-        {/* Loading history with enhanced spinner */}
-        {loadingHist && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="relative">
-              <div className="w-12 h-12 border-3 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 w-12 h-12 border-3 border-purple-500/20 border-t-purple-500 rounded-full animate-spin animation-delay-300"></div>
+      {/* ───── Messages ───── */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+        <div className="mx-auto flex max-w-3xl flex-col gap-5">
+          {loadingHist && (
+            <div className="flex flex-col items-center justify-center py-20" role="status">
+              <span className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900 dark:border-stone-700 dark:border-t-stone-100" />
+              <p className="mt-4 text-xs text-stone-500">Loading conversation…</p>
             </div>
-            <p className="text-gray-500 text-sm mt-4">Loading conversation history...</p>
-          </div>
-        )}
+          )}
 
-        {/* Enhanced Welcome message */}
-        {!loadingHist && messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-center animate-fade-in-up">
-            <div className="relative mb-6">
-              <div className="text-7xl sm:text-8xl animate-bounce">🤖</div>
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+          {!loadingHist && messages.length === 0 && (
+            <div className="flex flex-col items-center py-10 text-center sm:py-16">
+              {currentLang.logo ? (
+                <img src={currentLang.logo} alt="" className="h-12 w-12" />
+              ) : (
+                <TutorAvatar className="h-12 w-12" />
+              )}
+
+              <h2 className="mt-6 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl dark:text-stone-50">
+                What are you working on?
+              </h2>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                Ask about {currentLang.name} syntax, a bug you can't figure out, or a concept that isn't clicking.
+              </p>
+
+              <div className="mt-8 grid w-full max-w-md gap-2 sm:grid-cols-2">
+                {SUGGESTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => {
+                      setInput(q)
+                      inputRef.current?.focus()
+                    }}
+                    className="rounded-lg border border-stone-200 bg-white px-4 py-3 text-left text-sm text-stone-700 transition-colors hover:border-stone-400 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-3">
-              AI Coding Tutor
-            </h2>
-            <p className="text-gray-500 text-sm sm:text-base max-w-sm mb-8 leading-relaxed">
-              Ask me anything about {currentLang.label.split(' ')[1] || 'coding'} —
-              syntax, debugging, concepts, or code examples.
-            </p>
-            
-            {/* Enhanced Suggested questions with gradients */}
-            <div className="flex flex-wrap gap-2 justify-center max-w-md">
-              {[
-                'What is a for loop?',
-                'How do I define a function?',
-                'Explain OOP concepts',
-                'What are common errors?',
-              ].map(q => (
-                <button
-                  key={q}
-                  onClick={() => { setInput(q); inputRef.current?.focus() }}
-                  className="group text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-gray-400 hover:border-brand-500 hover:text-brand-400 hover:bg-gray-800 transition-all duration-300 hover:scale-105"
-                >
-                  {q}
-                </button>
-              ))}
+          )}
+
+          {!loadingHist &&
+            messages.map((msg, i) => (
+              <MessageBubble key={`${msg.timestamp || ''}-${i}`} msg={msg} userName={user?.name} />
+            ))}
+
+          {typing && <TypingIndicator />}
+
+          {error && (
+            <div
+              role="alert"
+              className="mx-auto flex max-w-full items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+            >
+              <AlertIcon />
+              <span>{error}</span>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Message list */}
-        {!loadingHist && messages.map((msg, i) => (
-          <MessageBubble key={i} msg={msg} />
-        ))}
-
-        {/* Typing indicator */}
-        {typing && <TypingIndicator />}
-
-        {/* Enhanced Error message */}
-        {error && (
-          <div className="flex justify-center mb-4 animate-shake">
-            <div className="bg-red-500/10 backdrop-blur-sm border border-red-500/30 text-red-400 text-xs sm:text-sm px-4 py-2 rounded-full flex items-center gap-2">
-              <span>⚠️</span>
-              {error}
-            </div>
-          </div>
-        )}
-
-        {/* Scroll anchor */}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* ── Enhanced Input bar with glassmorphism ── */}
-      <div className="bg-gray-900/80 backdrop-blur-xl border-t border-gray-800 px-4 sm:px-6 py-4 shrink-0">
-        <div className="max-w-5xl mx-auto flex gap-3 items-end">
-          <div className="flex-1 relative group">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={currentLang.placeholder}
-              rows={1}
-              className="w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-gray-200 placeholder-gray-500 rounded-2xl px-4 py-3 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none max-h-32 overflow-y-auto leading-relaxed transition-all duration-300"
-              style={{ minHeight: '48px' }}
-              onInput={e => {
-                e.target.style.height = 'auto'
-                e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px'
-              }}
-            />
-            <div className="absolute bottom-2 right-3 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
-              {input.length}/500
-            </div>
-          </div>
-          
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || typing}
-            className="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-700 hover:to-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl shrink-0"
-            aria-label="Send message"
-          >
-            {typing
-              ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : <SendIcon />
-            }
-          </button>
+          <div ref={endRef} />
         </div>
-        
-        <p className="text-center text-gray-700 text-xs mt-3 flex items-center justify-center gap-2">
-          <span className="inline-flex items-center gap-1">⌨️ Enter to send</span>
-          <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
-          <span className="inline-flex items-center gap-1">⇧ Shift+Enter for new line</span>
-          <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
-          <span>⚡ Gemini 2.5 Flash</span>
-        </p>
+      </div>
+
+      {/* ───── Input ───── */}
+      <div className="shrink-0 border-t border-stone-200 px-4 py-3.5 sm:px-6 dark:border-stone-800">
+        {!token ? (
+          <p className="mx-auto max-w-3xl text-center text-sm text-stone-600 dark:text-stone-400">
+            <Link to="/login" className="font-medium text-stone-900 underline underline-offset-4 dark:text-stone-100">
+              Log in
+            </Link>{' '}
+            to chat with the AI tutor and save your conversations.
+          </p>
+        ) : (
+          <>
+            <div className="mx-auto flex max-w-3xl items-end gap-2.5">
+              <div className="relative flex-1">
+                <label htmlFor="chat-input" className="sr-only">
+                  Message
+                </label>
+                <textarea
+                  id="chat-input"
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onInput={resizeInput}
+                  onKeyDown={handleKeyDown}
+                  placeholder={currentLang.placeholder}
+                  rows={1}
+                  maxLength={MAX_LEN}
+                  className="w-full resize-none overflow-y-auto rounded-xl border border-stone-300 bg-white px-4 py-3 pr-16 text-sm leading-relaxed text-stone-900 placeholder-stone-400 transition-colors focus:border-stone-900 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:placeholder-stone-500 dark:focus:border-stone-300"
+                  style={{ minHeight: '46px', maxHeight: '128px' }}
+                />
+                {input.length > MAX_LEN * 0.8 && (
+                  <span className="pointer-events-none absolute bottom-2 right-3 text-[10px] tabular-nums text-stone-400">
+                    {input.length}/{MAX_LEN}
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || typing}
+                aria-label="Send message"
+                className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl bg-stone-900 text-white transition-colors hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+              >
+                {typing ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white dark:border-stone-900/30 dark:border-t-stone-900" />
+                ) : (
+                  <SendIcon />
+                )}
+              </button>
+            </div>
+
+            <p className="mx-auto mt-2.5 hidden max-w-3xl text-center text-[11px] text-stone-400 sm:block">
+              <kbd className="rounded border border-stone-300 bg-white px-1.5 py-0.5 font-mono text-[10px] text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+                Enter
+              </kbd>{' '}
+              to send ·{' '}
+              <kbd className="rounded border border-stone-300 bg-white px-1.5 py-0.5 font-mono text-[10px] text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+                Shift + Enter
+              </kbd>{' '}
+              for a new line
+            </p>
+          </>
+        )}
       </div>
     </div>
   )
 }
-
-// Add these animations to your global CSS or Tailwind config:
-/*
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.4s ease-out forwards;
-}
-
-.animate-shake {
-  animation: shake 0.3s ease-in-out;
-}
-
-.animation-delay-300 {
-  animation-delay: 0.3s;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 10px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #4B5563;
-}
-*/
