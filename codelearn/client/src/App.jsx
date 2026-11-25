@@ -13,7 +13,7 @@ import ChatPage       from './pages/ChatPage'
 import LoginPage      from './pages/LoginPage'
 import RegisterPage   from './pages/RegisterPage'
 import NotFoundPage   from './pages/NotFoundPage'
-
+import WatchPage from './pages/WatchPage'
 // Scroll to top on every route change
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -35,7 +35,7 @@ function AppRoutes() {
         <Route path="/certificate/:id" element={<CertPage />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/verify/:id" element={<VerifyPage />} />
-        
+        <Route path="/watch/:lang/:videoId" element={<WatchPage />} />
 {/* Protected routes — require login */}
         <Route path="/learn/:lang"    element={
           <PrivateRoute><LearnPage /></PrivateRoute>

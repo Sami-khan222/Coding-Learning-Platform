@@ -241,7 +241,7 @@ function ExplainDrawer({ open, onClose, explanation, loading, error }) {
 
 /* ───────────── Code editor ───────────── */
 
-export default function CodeEditor({ language = 'python' }) {
+export default function CodeEditor({ language = 'python', editorHeight = '400px' }) {
   const { token } = useAuth()
   const isDark = useIsDark()
   const meta = LANG_META[language] || LANG_META.python
@@ -384,7 +384,7 @@ export default function CodeEditor({ language = 'python' }) {
 
         {/* ───── Monaco ───── */}
         <Editor
-          height="400px"
+  height={editorHeight}
           language={MONACO_LANG[language] || 'plaintext'}
           value={code}
           onChange={(val) => setCode(val || '')}

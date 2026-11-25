@@ -161,9 +161,11 @@ export default function Navbar() {
   const linkBase = 'relative flex h-16 items-center gap-2 px-3 text-sm font-medium transition-colors'
   const linkIdle = 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
   const linkActive = 'text-stone-900 dark:text-stone-50'
+  
+  if (location.pathname.startsWith('/watch')) return null
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#fcfbf8]/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
+    <header className="sticky top-0 z-50 border-b border-stone-200 ...">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <Logo />
 

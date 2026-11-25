@@ -182,7 +182,8 @@ function VideoModal({ video, onClose }) {
 
 /* ───────────── Video panel ───────────── */
 
-export default function VideoPanel({ language = 'python' }) {
+// signature
+export default function VideoPanel({ language = 'python', onSelect, activeId, compact = false, title = 'Video lessons' }) {
   const [topics, setTopics] = useState([])
   const [selectedTopic, setSelectedTopic] = useState('all')
   const [videos, setVideos] = useState([])
@@ -241,10 +242,14 @@ export default function VideoPanel({ language = 'python' }) {
     return () => ctrl.abort()
   }, [language, selectedTopic, reloadKey])
 
-  const openVideo = (video, el) => {
-    lastCardRef.current = el
-    setModalVideo(video)
+const openVideo = (video, el) => {
+  if (onSelect) {
+    onSelect(video)
+    return
   }
+  lastCardRef.current = el
+  setModalVideo(video)
+}
 
   const closeVideo = () => {
     setModalVideo(null)
@@ -256,7 +261,8 @@ export default function VideoPanel({ language = 'python' }) {
       {/* ───── Header ───── */}
       <div className="flex items-end justify-between gap-3 border-b border-stone-200 pb-4 dark:border-stone-800">
         <div>
-          <h2 className="font-serif text-xl tracking-tight text-stone-900 dark:text-stone-50">Video lessons</h2>
+          // heading, replace the text
+<h2 className="font-serif text-xl tracking-tight text-stone-900 dark:text-stone-50">{title}</h2>
           {!loading && !error && (
             <p className="mt-1 text-xs text-stone-500">
               {videos.length} {videos.length === 1 ? 'video' : 'videos'}
@@ -284,7 +290,7 @@ export default function VideoPanel({ language = 'python' }) {
 
       {/* ───── Loading ───── */}
       {loading && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2" aria-busy="true">
+        <div className={`grid grid-cols-1 gap-5 ${compact ? '' : 'sm:grid-cols-2'}`} aria-busy="true">
           {[0, 1, 2, 3].map((i) => (
             <SkeletonCard key={i} />
           ))}
@@ -327,53 +333,77 @@ export default function VideoPanel({ language = 'python' }) {
       )}
 
       {/* ───── Grid ───── */}
-      {!loading && !error && videos.length > 0 && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {videos.map((video) => (
-            <button
-              key={video.youtubeId}
-              onClick={(e) => openVideo(video, e.currentTarget)}
-              className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white text-left transition-colors hover:border-stone-400 dark:border-stone-800 dark:bg-stone-900 dark:hover:border-stone-600"
-            >
-              <div className="relative aspect-video overflow-hidden bg-stone-100 dark:bg-stone-800">
-                {!imgErrors[video.youtubeId] ? (
-                  <img
-                    src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                    onError={() => setImgErrors((prev) => ({ ...prev, [video.youtubeId]: true }))}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-stone-400">
-                    <PlayIcon />
-                  </div>
-                )}
-
-                <div className="absolute inset-0 flex items-center justify-center bg-stone-950/30 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-stone-900">
-                    <PlayIcon />
-                  </span>
-                </div>
-
-                <LevelTag level={video.level} className="absolute left-2.5 top-2.5 shadow-sm" />
+      {/* ───── Grid / playlist ───── */}
+{!loading && !error && videos.length > 0 && (
+  <div className={`grid gap-4 ${compact ? 'grid-cols-1' : 'grid-cols-1 gap-5 sm:grid-cols-2'}`}>
+    {videos.map((video) => {
+      const active = video.youtubeId === activeId
+      return (
+        <button
+          key={video.youtubeId}
+          onClick={(e) => openVideo(video, e.currentTarget)}
+          aria-current={active ? 'true' : undefined}
+          className={`group flex overflow-hidden rounded-xl border bg-white text-left transition-colors dark:bg-stone-900 ${
+            compact ? 'flex-row' : 'flex-col'
+          } ${
+            active
+              ? 'border-stone-900 dark:border-stone-100'
+              : 'border-stone-200 hover:border-stone-400 dark:border-stone-800 dark:hover:border-stone-600'
+          }`}
+        >
+          <div
+            className={`relative aspect-video shrink-0 overflow-hidden bg-stone-100 dark:bg-stone-800 ${
+              compact ? 'w-36 sm:w-44' : 'w-full'
+            }`}
+          >
+            {!imgErrors[video.youtubeId] ? (
+              <img
+                src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover"
+                onError={() => setImgErrors((prev) => ({ ...prev, [video.youtubeId]: true }))}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-stone-400">
+                <PlayIcon />
               </div>
+            )}
 
-              <div className="flex flex-1 flex-col p-4">
-                <p className="line-clamp-2 text-sm font-semibold leading-snug text-stone-900 dark:text-stone-50">
-                  {video.title}
-                </p>
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-xs text-stone-500">{video.channel}</span>
-                  {video.topic && (
-                    <span className={`${chip} shrink-0`}>{TOPIC_LABELS[video.topic] || video.topic}</span>
-                  )}
-                </div>
+            {active ? (
+              <span className="absolute inset-x-0 bottom-0 bg-stone-900/85 px-2 py-1 text-center text-[10px] font-medium uppercase tracking-wider text-white">
+                Now playing
+              </span>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-stone-950/30 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-stone-900">
+                  <PlayIcon />
+                </span>
               </div>
-            </button>
-          ))}
-        </div>
-      )}
+            )}
+
+            {!compact && <LevelTag level={video.level} className="absolute left-2.5 top-2.5 shadow-sm" />}
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col justify-between p-3.5">
+            <p className="line-clamp-2 text-sm font-semibold leading-snug text-stone-900 dark:text-stone-50">
+              {video.title}
+            </p>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className="min-w-0 truncate text-xs text-stone-500">
+                {video.channel}
+                {compact && video.level ? ` · ${video.level}` : ''}
+              </span>
+              {!compact && video.topic && (
+                <span className={`${chip} shrink-0`}>{TOPIC_LABELS[video.topic] || video.topic}</span>
+              )}
+            </div>
+          </div>
+        </button>
+      )
+    })}
+  </div>
+)}
 
       {modalVideo && <VideoModal video={modalVideo} onClose={closeVideo} />}
     </div>
