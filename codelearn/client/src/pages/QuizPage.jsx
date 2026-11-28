@@ -316,22 +316,19 @@ export default function QuizPage() {
   }, [selectedAnswer, answers, currentIndex, questions.length, submitQuiz])
 
   /* Countdown timer */
-  useEffect(() => {
-    if (loading || result || submitting || questions.length === 0) return
+  /* Countdown tick: only counts down */
+useEffect(() => {
+  if (loading || result || submitting || questions.length === 0) return
+  const id = setInterval(() => setTimeLeft((t) => t - 1), 1000)
+  return () => clearInterval(id)
+}, [loading, result, submitting, questions.length, currentIndex])
 
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          clearInterval(timerRef.current)
-          goNext()
-          return SECONDS_PER_QUESTION
-        }
-        return t - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timerRef.current)
-  }, [loading, result, submitting, questions.length, currentIndex, goNext])
+/* When time runs out: move on (separate effect, so it runs once) */
+useEffect(() => {
+  if (timeLeft <= 0 && !loading && !result && !submitting && questions.length > 0) {
+    goNext()
+  }
+}, [timeLeft, loading, result, submitting, questions.length, goNext])
 
   /* ── Render states ───────────────────────────────────── */
   if (loading) return <LoadingScreen lang={lang} />
@@ -357,34 +354,37 @@ export default function QuizPage() {
     return <ResultScreen {...result} lang={lang} onRetry={fetchQuestions} />
   }
 
-  const question = questions[currentIndex]
-  const isLast   = currentIndex === questions.length - 1
+    const question = questions[currentIndex]
+  const isLast = currentIndex === questions.length - 1
   const progress = (currentIndex / questions.length) * 100
 
-  return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#fcfbf8] text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+  const timeColor =
+    timeLeft > 10
+      ? 'text-emerald-700 dark:text-emerald-400'
+      : timeLeft > 5
+      ? 'text-amber-700 dark:text-amber-400'
+      : 'text-rose-700 dark:text-rose-400'
 
-      {/* ══════════ Top progress bar ══════════ */}
-      <header className="sticky top-16 z-20 border-b border-stone-200 bg-[#fcfbf8]/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
-        <div className={`mx-auto max-w-3xl ${PAD} py-4`}>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+  return (
+    <div className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-[#fcfbf8] text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+      {/* ══════════ Header: language, question count, timer, progress ══════════ */}
+      <header className="shrink-0 border-b border-stone-200 dark:border-stone-800">
+        <div className={`mx-auto max-w-6xl ${PAD} py-3`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <LangLogo meta={meta} className="h-6 w-6" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-stone-900 dark:text-white">{meta.name}</p>
-                <p className="text-xs text-stone-500">Quiz</p>
-              </div>
+              <p className="truncate text-sm font-semibold text-stone-900 dark:text-white">{meta.name} quiz</p>
             </div>
 
             <span className={BADGE}>
-              Question{' '}
-              <span className="font-semibold tabular-nums text-stone-900 dark:text-white">{currentIndex + 1}</span>
-              <span className="text-stone-400 dark:text-stone-600">/</span>
-              <span className="tabular-nums">{questions.length}</span>
-            </span>
+  Question{' '}
+  <span className="font-semibold tabular-nums text-stone-900 dark:text-white">{currentIndex + 1}</span>
+  <span className="text-stone-400 dark:text-stone-600">/</span>
+  <span className="tabular-nums">{questions.length}</span>
+</span>
           </div>
 
-          <div className="h-1 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800">
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800">
             <div
               className="h-full rounded-full bg-stone-900 transition-all duration-500 ease-out dark:bg-stone-100"
               style={{ width: `${progress}%` }}
@@ -393,95 +393,87 @@ export default function QuizPage() {
         </div>
       </header>
 
-      {/* ══════════ Question area ══════════ */}
-      <div className={`flex flex-1 items-start justify-center ${PAD} py-10 sm:py-14`}>
-        <div className="w-full max-w-3xl">
-
-          {/* Meta row: difficulty + topic + timer */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+      {/* ══════════ Body: scrolls only if the window is very small ══════════ */}
+      <main className="min-h-0 flex-1 overflow-y-auto">
+        <div className={`mx-auto grid max-w-6xl gap-6 ${PAD} py-6 lg:grid-cols-2 lg:gap-10 lg:py-10`}>
+          {/* Left: timer bar + question */}
+          <section className="min-w-0">
+            <div className="mb-4 flex flex-wrap items-center gap-3">
               {question.difficulty && <span className={BADGE}>{question.difficulty}</span>}
               {question.topic && <span className="text-xs text-stone-500">{question.topic}</span>}
             </div>
 
-            <span
-              className={`font-mono text-sm font-medium tabular-nums ${
-                timeLeft > 10
-                  ? 'text-emerald-700 dark:text-emerald-400'
-                  : timeLeft > 5
-                  ? 'text-amber-700 dark:text-amber-400'
-                  : 'text-rose-700 dark:text-rose-400'
-              }`}
-            >
-              {timeLeft}s
-            </span>
-          </div>
+            <div className="mb-5 flex items-center gap-3">
+  <div className="flex-1">
+    <TimerBar seconds={Math.max(timeLeft, 0)} total={SECONDS_PER_QUESTION} />
+  </div>
+  <span className={`w-10 shrink-0 text-right font-mono text-sm font-medium tabular-nums ${timeColor}`}>
+    {Math.max(timeLeft, 0)}s
+  </span>
+</div>
 
-          <div className="mb-8">
-            <TimerBar seconds={timeLeft} total={SECONDS_PER_QUESTION} />
-          </div>
+            <WindowFrame title={`question-${String(currentIndex + 1).padStart(2, '0')}`}>
+              <div className="p-5 sm:p-6">
+                <Eyebrow>Question {currentIndex + 1}</Eyebrow>
+                <h2 className="mt-3 font-serif text-xl leading-snug tracking-tight text-stone-900 sm:text-2xl dark:text-stone-50">
+                  {question.questionText}
+                </h2>
+              </div>
+            </WindowFrame>
+          </section>
 
-          {/* Question card */}
-          <WindowFrame title={`question-${String(currentIndex + 1).padStart(2, '0')}`} className="mb-6">
-            <div className="p-6 sm:p-7">
-              <Eyebrow>Question {currentIndex + 1}</Eyebrow>
-              <h2 className="mt-3 font-serif text-2xl leading-snug tracking-tight text-stone-900 sm:text-3xl dark:text-stone-50">
-                {question.questionText}
-              </h2>
-            </div>
-          </WindowFrame>
-
-          {/* Answer options */}
-          <div className="mb-8 grid grid-cols-1 gap-2.5">
-            {question.options.map((option, idx) => {
-              const isSelected = selectedAnswer === idx
-              return (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedAnswer(idx)}
-                  aria-pressed={isSelected}
-                  className={`group flex w-full items-center gap-4 rounded-lg border px-4 py-3.5 text-left text-sm transition-colors ${
-                    isSelected
-                      ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900'
-                      : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-800'
-                  }`}
-                >
-                  <span
-                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md font-mono text-xs transition-colors ${
+          {/* Right: options + submit */}
+          <section className="min-w-0">
+            <div className="grid grid-cols-1 gap-2.5">
+              {question.options.map((option, idx) => {
+                const isSelected = selectedAnswer === idx
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedAnswer(idx)}
+                    aria-pressed={isSelected}
+                    className={`group flex w-full items-center gap-4 rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
                       isSelected
-                        ? 'bg-white/15 text-white dark:bg-stone-900/10 dark:text-stone-900'
-                        : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 dark:group-hover:bg-stone-700'
+                        ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900'
+                        : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-800'
                     }`}
                   >
-                    {String.fromCharCode(65 + idx)}
-                  </span>
-                  <span className="flex-1 leading-relaxed">{option}</span>
-                  {isSelected && <Check className="h-4 w-4 shrink-0" />}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Footer: status + CTA */}
-          <div className="flex flex-col-reverse gap-4 border-t border-stone-200 pt-6 sm:flex-row sm:items-center sm:justify-between dark:border-stone-800">
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  selectedAnswer !== null ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-700'
-                }`}
-              />
-              <p className="text-xs text-stone-500">
-                {selectedAnswer === null ? 'Select an answer, or wait for the timer' : 'Answer selected'}
-              </p>
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-xs transition-colors ${
+                        isSelected
+                          ? 'bg-white/15 text-white dark:bg-stone-900/10 dark:text-stone-900'
+                          : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 dark:group-hover:bg-stone-700'
+                      }`}
+                    >
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className="flex-1 leading-relaxed">{option}</span>
+                    {isSelected && <Check className="h-4 w-4 shrink-0" />}
+                  </button>
+                )
+              })}
             </div>
 
-            <button onClick={goNext} className={BTN_PRIMARY}>
-              {isLast ? 'Submit quiz' : 'Next question'}
-              {isLast ? <Check /> : <ArrowRight />}
-            </button>
-          </div>
+            <div className="mt-6 flex flex-col-reverse gap-4 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between dark:border-stone-800">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    selectedAnswer !== null ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-700'
+                  }`}
+                />
+                <p className="text-xs text-stone-500">
+                  {selectedAnswer === null ? 'Select an answer, or wait for the timer' : 'Answer selected'}
+                </p>
+              </div>
+
+              <button onClick={goNext} className={BTN_PRIMARY}>
+                {isLast ? 'Submit quiz' : 'Next question'}
+                {isLast ? <Check /> : <ArrowRight />}
+              </button>
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
